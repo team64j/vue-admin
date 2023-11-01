@@ -78,14 +78,14 @@ html, body, #app {
         @apply opacity-0
     }
 
-    select, input[list], .evo-appearance-select {
+    select, input[list], .appearance-select {
         @apply !pr-8 bg-no-repeat bg-right;
         background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22grey%22%20viewBox%3D%220%200%2024%2014%22%3E%3Cpath%20d%3D%22M24%202v1L13%2014a1%201%200%200%201-2%200L0%203a1%201%200%200%201%200-2l1-1a1%201%200%200%201%202%200l9%2010%209-10a1%201%200%200%201%202%200l1%201v1Z%22%2F%3E%3C%2Fsvg%3E");
         background-size: 0.8em;
         background-position: calc(100% - 0.5em) center;
     }
 
-    select:focus, input[list]:focus, .evo-appearance-select:focus {
+    select:focus, input[list]:focus, .appearance-select:focus {
         background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22royalblue%22%20viewBox%3D%220%200%2024%2014%22%3E%3Cpath%20d%3D%22M24%202v1L13%2014a1%201%200%200%201-2%200L0%203a1%201%200%200%201%200-2l1-1a1%201%200%200%201%202%200l9%2010%209-10a1%201%200%200%201%202%200l1%201v1Z%22%2F%3E%3C%2Fsvg%3E");
     }
 
