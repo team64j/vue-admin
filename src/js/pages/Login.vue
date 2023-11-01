@@ -94,6 +94,11 @@ export default {
   <div class="dark flex w-full h-full justify-center items-center bg-login">
     <div class="relative overflow-hidden bg-gray-950 text-white/80 rounded-2xl p-6 shadow-lg w-[30rem] max-w-[95%]">
 
+      <div class="text-center">
+        <img src="../../img/logo.svg" :src="data['logo']" class="inline-block h-20">
+        <div class="text-white font-bold text-xl">{{ data?.['siteName'] ?? `Vue Admin` }}</div>
+      </div>
+
       <div>
         <label for="hostname" class="font-medium">Manager API</label>
 

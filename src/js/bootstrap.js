@@ -3,13 +3,10 @@ import axios from 'axios'
 import store from './store'
 import router from './router'
 
-window._ = _
-window.axios = axios
+axios.defaults.headers.common['Accept'] = 'application/json'
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
-window.axios.defaults.headers.common['Accept'] = 'application/json'
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
-
-window.axios.interceptors['request'].use(function (config) {
+axios.interceptors['request'].use(config => {
   config.baseURL = (store.getters['Storage/get']('hostname') || location.origin).replace(/\/$/g, '')
 
   const token = store.getters['Storage/get']('token')
@@ -92,3 +89,6 @@ axios.interceptors['response'].use(response => response, error => {
 
   return Promise.reject(error)
 })
+
+window._ = _
+window.axios = axios
