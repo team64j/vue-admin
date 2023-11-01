@@ -92,33 +92,34 @@ export default {
 
 <template>
   <div class="dark flex w-full h-full justify-center items-center bg-login">
-    <div class="relative overflow-hidden bg-gray-950 text-white/80 rounded-2xl p-6 shadow-lg w-[30rem] max-w-[95%]">
+    <div class="relative overflow-hidden bg-black/80 text-white/80 font-medium rounded-xl pt-6 px-8 pb-6 shadow-lg w-[35rem] max-w-[95%]">
 
-      <div class="text-center">
-        <img src="../../img/logo.svg" :src="data['logo']" class="inline-block h-20">
-        <div class="text-white font-bold text-xl">{{ data?.['siteName'] ?? `Vue Admin` }}</div>
+      <div class="flex items-center justify-center">
+        <img src="../../img/logo.svg" :src="data['logo']" class="inline-block h-14">
+        <div class="text-3xl font-bold text-white ml-3 uppercase">Vue Admin</div>
       </div>
 
+      <div class="text-center text-xs font-normal">{{ data?.['siteName'] || `* * *` }}</div>
+
       <div>
-        <label for="hostname" class="font-medium">Manager API</label>
+        <label for="hostname" class="text-sm">Manager API</label>
 
         <div class="flex mb-2">
-          <div v-if="lang" class="grow-0 flex -mr-[1px]">
-            <button type="button" class="h-full flex items-center rounded-r-none font-medium" @click="showLanguage">
+          <div v-if="lang" class="grow-0 flex">
+            <button type="button" class="h-full flex items-center border-2 py-2 !ring-0 !bg-transparent rounded-r-none" @click="showLanguage">
               {{ lang.key.toUpperCase() }}
             </button>
           </div>
-          <div class="grow flex">
-            <input v-model="form['hostname']" type="text" id="hostname" class="rounded-r-none z-[1]"
-                   :class="[ errors['hostname'] ? '!border-rose-500 !ring-rose-500' : '', lang ? 'rounded-l-none' : '']">
+          <div class="grow flex -mx-[2px]">
+            <input v-model="form['hostname']" type="text" id="hostname" class="border-2 py-2 !ring-0 !bg-transparent rounded-r-none z-[1]"
+                   :class="[ errors['hostname'] ? '!border-rose-500' : '', lang ? 'rounded-l-none' : '']">
           </div>
-          <div class="grow-0 flex -ml-[1px]">
-            <button type="button" class="h-full flex items-center rounded-l-none"
-                    :class="[ connected ? 'btn-blue' : '']"
+          <div class="grow-0 flex">
+            <button type="button" class="border-2 py-2 !ring-0 !bg-transparent h-full flex items-center rounded-l-none"
                     :disabled="isCheckServer"
                     @click="checkServer">
               <i v-if="isCheckServer" class="fa fa-circle-notch fa-fw animate-spin"/>
-              <i v-else class="fa fa-globe fa-fw"/>
+              <i v-else class="fa fa-globe fa-fw" :class="[ connected ? 'text-green-500' : '']"/>
             </button>
           </div>
         </div>
@@ -126,30 +127,32 @@ export default {
 
       <div v-if="connected" class="pt-2">
         <div class="mb-4">
-          <label for="username" class="font-medium">{{ lang.user }}</label>
+          <label for="username" class="text-sm">{{ lang.user }}</label>
           <input v-model="form['username']"
                  type="text"
                  id="username"
                  name="username"
-                 :class="[ errors['username'] ? '!border-rose-500 !ring-rose-500' : '']"
+                 class="border-2 py-2 !ring-0 !bg-transparent"
+                 :class="[ errors['username'] ? '!border-rose-500' : '']"
                  autocomplete="username">
         </div>
 
         <div class="mb-4">
-          <label for="password" class="font-medium">{{ lang.password }}</label>
+          <label for="password" class="text-sm">{{ lang.password }}</label>
           <input v-model="form['password']" type="password"
                  id="password"
                  name="password"
-                 :class="[ errors['password'] ? '!border-rose-500 !ring-rose-500' : '']">
+                 class="border-2 py-2 !ring-0 !bg-transparent"
+                 :class="[ errors['password'] ? '!border-rose-500' : '']">
         </div>
 
-        <div class="mb-2 flex justify-between items-center">
+        <div class="flex justify-between items-center">
           <div class="inline-flex items-center">
-            <input type="checkbox" id="remember" name="remember" checked value="1" class="mr-2">
-            <label for="remember">{{ lang.remember }}</label>
+            <input type="checkbox" id="remember" name="remember" checked value="1" class="mr-2 h-5 w-5">
+            <label for="remember" class="text-sm">{{ lang.remember }}</label>
           </div>
           <div>
-            <button type="button" class="btn-green flex items-center justify-center" :disabled="isLogin" @click="login">
+            <button type="button" class="btn-green !ring-0 py-2 px-5 flex items-center justify-center" :disabled="isLogin" @click="login">
               <i v-if="isLogin" class="fa fa-circle-notch fa-fw animate-spin absolute"/>
               <span :class="[ isLogin ? 'opacity-0' : '' ]">{{ lang.login }}</span>
             </button>
@@ -157,17 +160,17 @@ export default {
         </div>
       </div>
 
-      <div v-if="data?.version" class="text-xs text-gray-400 text-center mt-4 -mb-4">
+      <div v-if="data?.version" class="text-xs text-gray-400 text-center mt-2 -mb-4">
         {{ data.version }}
       </div>
 
       <div v-if="isShowLanguages && data?.languages"
-           class="absolute z-10 bg-gray-950 text-white/80 rounded-2xl p-6 left-0 top-0 w-full h-full overflow-auto">
+           class="absolute z-10 bg-gray-800 text-white/80 rounded-xl p-8 left-0 top-0 w-full h-full overflow-auto">
         <i class="fa fa-close text-rose-600 absolute top-3 right-3 cursor-pointer" @click="showLanguage"/>
 
         <div v-for="i in data.languages"
              class="px-4 py-1 hover:bg-blue-600 hover:text-white rounded cursor-pointer transition"
-             :class="[lang.key === i.key ? 'bg-white/10' : '']"
+             :class="[lang.key === i.key ? 'bg-white/10 font-bold' : '']"
              @click="selectLanguage(i)">
           <i class="fa fa-fw" :class="[lang.key === i.key ? 'fa-check' : '']"/>
           {{ i.value }}

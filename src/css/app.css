@@ -114,7 +114,7 @@ html, body, #app {
     }
 
     .btn-green {
-        @apply bg-green-600 border-transparent text-white hover:bg-green-700 active:bg-green-700 focus:border-green-500 focus:ring-green-500 dark:bg-green-700 dark:border-transparent dark:hover:bg-green-800 dark:active:bg-green-800 dark:focus:border-green-600 dark:focus:ring-green-600
+        @apply bg-green-600 border-transparent text-white hover:bg-green-700 active:bg-green-700 focus:border-green-500 focus:ring-green-500 dark:bg-green-600 dark:border-transparent dark:hover:bg-green-700 dark:active:bg-green-700 dark:focus:border-green-600 dark:focus:ring-green-600
     }
 
     .btn-green.disabled, .btn-green:disabled {
