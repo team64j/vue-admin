@@ -13,6 +13,7 @@ export default {
       connected: false,
       lang: null,
       errors: {},
+      logged: false,
       isCheckServer: false,
       isLogin: false,
       isShowLanguages: false
@@ -70,6 +71,7 @@ export default {
 
       axios.post('/auth/login', this.form).then(r => {
         if (r.data['access_token']) {
+          this.logged = true
           store.dispatch('Storage/set', { lang: this.lang.key })
 
           store.dispatch('Storage/set', {
@@ -92,7 +94,8 @@ export default {
 
 <template>
   <div class="dark flex w-full h-full justify-center items-center bg-login">
-    <div class="relative overflow-hidden bg-black/80 text-white/80 font-medium rounded-xl pt-6 px-8 pb-6 shadow-lg w-[35rem] max-w-[95%]">
+    <div
+        class="relative overflow-hidden bg-black/80 text-white/80 font-medium rounded-xl pt-6 px-8 pb-6 shadow-lg w-[33rem] max-w-[95%]">
 
       <div class="flex items-center justify-center">
         <img src="../../img/logo.svg" :src="data['logo']" class="inline-block h-14">
