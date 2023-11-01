@@ -13,10 +13,35 @@ export default {
       active: false
     }
   },
+  computed: {
+    icon () {
+      if (this.data['icons'] && this.$root[this.data['key']] !== undefined) {
+        for (const i in this.data['icons']) {
+          if (this.$root[this.data['key']] === this.data['icons'][i]['value']) {
+            return this.data['icons'][i]['key']
+          }
+        }
+      }
+
+      return this.data['icon'] ?? null
+    }
+  },
   methods: {
-    onClick (data) {
-      if (data.click && this.$root[data.click]) {
-        this.$root[data.click]()
+    onClick () {
+      if (this.data['icons'] && this.$root[this.data['key']] !== undefined) {
+        for (const i in this.data['icons']) {
+          const ii = parseInt(i)
+          const index = this.data['icons'][ii + 1] ? ii + 1 : 0
+          if (this.data['icon'] === this.data['icons'][index]['key']) {
+            this.data['icon'] = this.data['icons'][index]['key']
+            this.$root[this.data['key']] = this.data['icons'][i]['value']
+            return
+          }
+        }
+      }
+
+      if (this.data['click'] && this.$root[this.data['click']]) {
+        return this.$root[this.data['click']]()
       }
     }
   }
@@ -26,24 +51,23 @@ export default {
 <template>
   <li :data-level="level">
     <a v-if="data['href']" :href="data['href']" target="_blank">
-      <i v-if="data['icon']" :class="data['icon']"/>
+      <i v-if="icon" :class="icon"/>
       <span v-if="data['name']">{{ data['name'] }}</span>
     </a>
 
     <router-link v-else-if="data['to']" :to="data['to']">
-      <i v-if="data['icon']" :class="data['icon']"/>
+      <i v-if="icon" :class="icon"/>
       <span v-if="data['name']">{{ data['name'] }}</span>
     </router-link>
 
-    <span v-else @click="onClick(data)" :class="[ data['click'] ? 'cursor-pointer' : '' ]">
-      <i v-if="data['icon']" :class="data['icon']"/>
+    <span v-else @click="onClick(data)" :class="[ data['click'] || data['icons'] ? 'cursor-pointer' : '' ]">
+      <i v-if="icon" :class="icon"/>
       <span v-if="data['name']">{{ data['name'] }}</span>
     </span>
 
     <ul v-if="data['data']">
       <menu-item v-for="i in data['data']" :data="i" :level="level + 1"/>
     </ul>
-
   </li>
 </template>
 

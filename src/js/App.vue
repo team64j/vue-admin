@@ -10,12 +10,23 @@ export default {
   props: {
     layout: Object
   },
+  data () {
+    return {
+      dark: store.getters['Storage/get']('dark', false)
+    }
+  },
+  watch: {
+    dark (dark) {
+      store.dispatch('Storage/set', { dark: dark })
+      document.documentElement.classList.toggle('dark', dark)
+    }
+  },
   created () {
-    document.documentElement.classList.toggle('dark', !store.getters['Storage/get']('dark'))
+    document.documentElement.classList.toggle('dark', this.dark)
   },
   methods: {
     toggleTheme () {
-      store.dispatch('Storage/set', { dark: !store.getters['Storage/get']('dark') })
+      store.dispatch('Storage/set', { dark: this.dark })
       document.documentElement.classList.toggle('dark')
     }
   }
