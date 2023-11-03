@@ -132,7 +132,8 @@ export default {
           <div class="grow flex -mx-[1px]">
             <input v-model="hostname" type="text" id="hostname"
                    class="border-2 py-2 !ring-0 !bg-transparent rounded-r-none z-[1]"
-                   :class="[ errors['hostname'] ? '!border-rose-500' : '', lang ? 'rounded-l-none' : '']">
+                   :class="[ errors['hostname'] ? '!border-rose-500' : '', lang ? 'rounded-l-none' : '']"
+                   @keyup.enter="checkServer">
           </div>
           <div v-if="hostnames.length" class="grow-0 flex -mx-[1px]">
             <button type="button" class="border-2 py-2 !ring-0 !bg-transparent h-full flex items-center rounded-none"
@@ -160,7 +161,8 @@ export default {
                  name="username"
                  class="border-2 py-2 !ring-0 !bg-transparent"
                  :class="[ errors['username'] ? '!border-rose-500' : '']"
-                 autocomplete="username">
+                 autocomplete="username"
+                 @keyup.enter="login">
         </div>
 
         <div class="mb-4">
@@ -169,7 +171,8 @@ export default {
                  id="password"
                  name="password"
                  class="border-2 py-2 !ring-0 !bg-transparent"
-                 :class="[ errors['password'] ? '!border-rose-500' : '']">
+                 :class="[ errors['password'] ? '!border-rose-500' : '']"
+                 @keyup.enter="login">
         </div>
 
         <div class="flex justify-between items-center">
