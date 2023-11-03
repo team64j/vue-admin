@@ -6,17 +6,18 @@ export default {
   name: 'Login',
   data () {
     return {
-      form: {
-        hostname: store.getters['Storage/get']('hostname') || location.origin
-      },
+      form: {},
       data: null,
       connected: false,
       lang: null,
       errors: {},
+      hostname: store.getters['Storage/get']('hostname') || location.origin,
+      hostnames: store.getters['Storage/get']('hostnames') || [],
       logged: false,
       isCheckServer: false,
       isLogin: false,
-      isShowLanguages: false
+      isShowLanguages: false,
+      isShowHostnames: false
     }
   },
   created () {
@@ -29,11 +30,11 @@ export default {
       this.errors = {}
       this.isCheckServer = true
 
-      if (!this.form['hostname']) {
-        this.form['hostname'] = location.origin
+      if (!this.hostname) {
+        this.hostname = location.origin
       }
 
-      store.dispatch('Storage/set', { hostname: this.form['hostname'].replace(/\/$/g, '') })
+      store.dispatch('Storage/set', { hostname: this.hostname.replace(/\/$/g, '') })
 
       axios.post('bootstrap').then(r => {
         if (typeof r.data === 'string') {
@@ -57,13 +58,22 @@ export default {
         this.isCheckServer = false
       })
     },
-    showLanguage () {
+    showLanguages () {
       this.isShowLanguages = !this.isShowLanguages
     },
     selectLanguage (lang) {
       this.lang = lang
       store.dispatch('Storage/set', { lang: lang.key })
-      this.showLanguage()
+      this.showLanguages()
+    },
+    showHostnames () {
+      this.isShowHostnames = !this.isShowHostnames
+    },
+    selectHostname (hostname) {
+      this.hostname = hostname
+      store.dispatch('Storage/set', { hostname: this.hostname })
+      this.showHostnames()
+      this.checkServer()
     },
     login () {
       this.errors = {}
@@ -73,6 +83,11 @@ export default {
         if (r.data['access_token']) {
           this.logged = true
           store.dispatch('Storage/set', { lang: this.lang.key })
+
+          if (!this.hostnames.some(i => i === this.hostname)) {
+            this.hostnames.push(this.hostname)
+            store.dispatch('Storage/set', { hostnames: this.hostnames })
+          }
 
           store.dispatch('Storage/set', {
             token: r.data['access_token'],
@@ -107,17 +122,25 @@ export default {
       <div>
         <label for="hostname" class="text-sm">Manager API</label>
 
-        <div class="flex mb-2">
-          <div v-if="lang" class="grow-0 flex">
-            <button type="button" class="h-full flex items-center border-2 py-2 !ring-0 !bg-transparent rounded-r-none" @click="showLanguage">
+        <div class="flex mb-2 mx-[1px]">
+          <div v-if="lang" class="grow-0 flex -mx-[1px]">
+            <button type="button" class="h-full flex items-center border-2 py-2 !ring-0 !bg-transparent rounded-r-none"
+                    @click="showLanguages">
               {{ lang.key.toUpperCase() }}
             </button>
           </div>
-          <div class="grow flex -mx-[2px]">
-            <input v-model="form['hostname']" type="text" id="hostname" class="border-2 py-2 !ring-0 !bg-transparent rounded-r-none z-[1]"
+          <div class="grow flex -mx-[1px]">
+            <input v-model="hostname" type="text" id="hostname"
+                   class="border-2 py-2 !ring-0 !bg-transparent rounded-r-none z-[1]"
                    :class="[ errors['hostname'] ? '!border-rose-500' : '', lang ? 'rounded-l-none' : '']">
           </div>
-          <div class="grow-0 flex">
+          <div v-if="hostnames.length" class="grow-0 flex -mx-[1px]">
+            <button type="button" class="border-2 py-2 !ring-0 !bg-transparent h-full flex items-center rounded-none"
+                    @click="showHostnames">
+              <i class="fa fa-ellipsis fa-fw"/>
+            </button>
+          </div>
+          <div class="grow-0 flex -mx-[1px]">
             <button type="button" class="border-2 py-2 !ring-0 !bg-transparent h-full flex items-center rounded-l-none"
                     :disabled="isCheckServer"
                     @click="checkServer">
@@ -169,7 +192,7 @@ export default {
 
       <div v-if="isShowLanguages && data?.languages"
            class="absolute z-10 bg-gray-800 text-white/80 rounded-xl p-8 left-0 top-0 w-full h-full overflow-auto">
-        <i class="fa fa-close text-rose-600 absolute top-3 right-3 cursor-pointer" @click="showLanguage"/>
+        <i class="fa fa-close text-rose-600 absolute top-3 right-3 cursor-pointer" @click="showLanguages"/>
 
         <div v-for="i in data.languages"
              class="px-4 py-1 hover:bg-blue-600 hover:text-white rounded cursor-pointer transition"
@@ -177,6 +200,19 @@ export default {
              @click="selectLanguage(i)">
           <i class="fa fa-fw" :class="[lang.key === i.key ? 'fa-check' : '']"/>
           {{ i.value }}
+        </div>
+      </div>
+
+      <div v-if="isShowHostnames"
+           class="absolute z-10 bg-gray-800 text-white/80 rounded-xl p-8 left-0 top-0 w-full h-full overflow-auto">
+        <i class="fa fa-close text-rose-600 absolute top-3 right-3 cursor-pointer" @click="showHostnames"/>
+
+        <div v-for="i in this.hostnames"
+             class="px-4 py-1 hover:bg-blue-600 hover:text-white rounded cursor-pointer transition"
+             :class="[hostname === i ? 'bg-white/10 font-bold' : '']"
+             @click="selectHostname(i)">
+          <i class="fa fa-fw" :class="[hostname === i ? 'fa-check' : '']"/>
+          {{ i }}
         </div>
       </div>
 
