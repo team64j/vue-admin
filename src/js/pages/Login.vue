@@ -9,7 +9,13 @@ export default {
       form: {},
       data: null,
       connected: false,
-      lang: null,
+      lang: {
+        key: 'en',
+        user: 'User',
+        password: 'Password',
+        remember: 'Remember me',
+        login: 'Login'
+      },
       errors: {},
       hostname: store.getters['Storage/get']('hostname') || location.origin,
       hostnames: store.getters['Storage/get']('hostnames') || [],
@@ -42,13 +48,13 @@ export default {
           return
         }
 
-        this.data = r.data
+        this.data = r.data['data'] || {}
 
         if (this.data.version) {
           this.connected = true
         }
 
-        if (this.data.languages) {
+        if (this.data.languages?.length) {
           this.lang = this.data.languages[store.getters['Storage/get']('lang') || 'en'] ?? {}
         }
       }).catch(() => {
@@ -80,7 +86,9 @@ export default {
       this.isLogin = true
 
       axios.post('/auth/login', this.form).then(r => {
-        if (r.data['access_token']) {
+        const data = r.data['data']
+
+        if (data['access_token']) {
           this.logged = true
           store.dispatch('Storage/set', { lang: this.lang.key })
 
@@ -90,8 +98,8 @@ export default {
           }
 
           store.dispatch('Storage/set', {
-            token: r.data['access_token'],
-            tokenExpiresIn: r.data['expires_in']
+            token: data['access_token'],
+            tokenExpiresIn: data['expires_in']
           }).then(() => {
             router.push('/').then(() => location.reload())
           })
@@ -123,10 +131,10 @@ export default {
         <label for="hostname" class="text-sm">Manager API</label>
 
         <div class="flex mb-2 mx-[1px]">
-          <div v-if="lang" class="grow-0 flex -mx-[1px]">
+          <div v-if="data?.languages?.length" class="grow-0 flex -mx-[1px]">
             <button type="button" class="h-full flex items-center border-2 py-2 !ring-0 !bg-transparent rounded-r-none"
                     @click="showLanguages">
-              {{ lang.key.toUpperCase() }}
+              {{ lang.key?.toUpperCase() }}
             </button>
           </div>
           <div class="grow flex -mx-[1px]">
@@ -177,7 +185,7 @@ export default {
 
         <div class="flex justify-between items-center">
           <div class="inline-flex items-center">
-            <input type="checkbox" id="remember" name="remember" checked value="1" class="mr-2 h-5 w-5">
+            <input v-model="form['remember']" type="checkbox" id="remember" name="remember" class="mr-2 h-5 w-5">
             <label for="remember" class="text-sm">{{ lang.remember }}</label>
           </div>
           <div>
@@ -193,7 +201,7 @@ export default {
         {{ data.version }}
       </div>
 
-      <div v-if="isShowLanguages && data?.languages"
+      <div v-if="isShowLanguages && data?.languages?.length"
            class="absolute z-10 bg-gray-800 text-white/80 rounded-xl p-8 left-0 top-0 w-full h-full overflow-auto">
         <i class="fa fa-close text-rose-600 absolute top-3 right-3 cursor-pointer" @click="showLanguages"/>
 
