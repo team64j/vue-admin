@@ -30,9 +30,10 @@ export default {
 
 <template>
   <div class="w-full h-full flex flex-col">
-    <menu-component :data="layout['menu']" class="grow-0 relative z-20"/>
+    <menu-component ref="menu" :data="layout['menu']" class="grow-0 relative z-20 app-refs-menu"/>
     <div class="grow-1 flex flex-row h-full overflow-hidden relative z-10">
-      <sidebar :data="layout['sidebar']" class="grow-0 shrink-0 w-72 flex flex-col border"/>
+      <sidebar ref="sidebar" :data="layout['sidebar']"
+               class="grow-0 shrink-0 w-72 flex flex-col border app-refs-sidebar"/>
       <global-tabs class="flex grow basis-0 overflow-hidden border"/>
     </div>
   </div>
