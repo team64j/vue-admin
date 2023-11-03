@@ -11,23 +11,18 @@ export default {
     layout: Object
   },
   data () {
-    return {
-      dark: store.getters['Storage/get']('dark', false)
-    }
+    return {}
   },
-  watch: {
-    dark (dark) {
-      store.dispatch('Storage/set', { dark: dark })
-      document.documentElement.classList.toggle('dark', dark)
-    }
-  },
-  created () {
-    document.documentElement.classList.toggle('dark', this.dark)
-  },
-  methods: {
-    toggleTheme () {
-      store.dispatch('Storage/set', { dark: this.dark })
-      document.documentElement.classList.toggle('dark')
+  computed: {
+    dark: {
+      set (key) {
+        store.dispatch('Storage/set', { dark: key })
+      },
+      get () {
+        const key = store.getters['Storage/get']('dark', 0)
+        document.documentElement.classList.toggle('dark', !parseInt(key))
+        return key
+      }
     }
   }
 }

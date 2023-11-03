@@ -1,4 +1,6 @@
 <script>
+import store from '../../store'
+
 export default {
   name: 'MenuItem',
   props: {
@@ -16,8 +18,9 @@ export default {
   computed: {
     icon () {
       if (this.data['icons'] && this.$root[this.data['key']] !== undefined) {
+        const key = this.$root[this.data['key']].toString()
         for (const i in this.data['icons']) {
-          if (this.$root[this.data['key']] === this.data['icons'][i]['value']) {
+          if (i === key) {
             return this.data['icons'][i]['key']
           }
         }
@@ -29,13 +32,10 @@ export default {
   methods: {
     onClick () {
       if (this.data['icons'] && this.$root[this.data['key']] !== undefined) {
+        const key = this.$root[this.data['key']].toString()
         for (const i in this.data['icons']) {
-          const ii = parseInt(i)
-          const index = this.data['icons'][ii + 1] ? ii + 1 : 0
-          if (this.data['icon'] === this.data['icons'][index]['key']) {
-            this.data['icon'] = this.data['icons'][index]['key']
+          if (i === key) {
             this.$root[this.data['key']] = this.data['icons'][i]['value']
-            return
           }
         }
       }
