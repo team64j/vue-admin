@@ -57,6 +57,11 @@ export default {
         if (this.data.languages?.length) {
           this.lang = this.data.languages[store.getters['Storage/get']('lang') || 'en'] ?? {}
         }
+
+        if (!this.hostnames.some(i => i === this.hostname)) {
+          this.hostnames.push(this.hostname)
+          store.dispatch('Storage/set', { hostnames: this.hostnames })
+        }
       }).catch(() => {
         this.connected = false
         this.errors['hostname'] = true
@@ -91,12 +96,6 @@ export default {
         if (data['access_token']) {
           this.logged = true
           store.dispatch('Storage/set', { lang: this.lang.key })
-
-          if (!this.hostnames.some(i => i === this.hostname)) {
-            this.hostnames.push(this.hostname)
-            store.dispatch('Storage/set', { hostnames: this.hostnames })
-          }
-
           store.dispatch('Storage/set', {
             token: data['access_token'],
             tokenExpiresIn: data['expires_in']
@@ -140,7 +139,7 @@ export default {
           <div class="grow flex -mx-[1px]">
             <input v-model="hostname" type="text" id="hostname"
                    class="border-2 py-2 !ring-0 !bg-transparent rounded-r-none z-[1]"
-                   :class="[ errors['hostname'] ? '!border-rose-500' : '', lang ? 'rounded-l-none' : '']"
+                   :class="[ errors['hostname'] ? '!border-rose-500' : '', data?.languages?.length ? 'rounded-l-none' : '']"
                    @keyup.enter="checkServer">
           </div>
           <div v-if="hostnames.length" class="grow-0 flex -mx-[1px]">
