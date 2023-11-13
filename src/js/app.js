@@ -19,14 +19,16 @@ function login () {
 
 if (store.getters['Storage/get']('token')) {
   axios.post('bootstrap').then(r => {
-    if (r.data.routes) {
-      for (const route of r.data.routes) {
+    const data = r.data?.['data'] ?? {}
+
+    if (data.routes) {
+      for (const route of data.routes) {
         route.component = Component
         router.addRoute(route)
       }
 
       window.Vue = vue.createApp(App, {
-        layout: r.data.layout
+        layout: data.layout
       })
 
       window.Vue.use(router)
