@@ -23,6 +23,14 @@ export default {
         document.documentElement.classList.toggle('dark', !parseInt(key))
         return key
       }
+    },
+    sidebarShow: {
+      set (show) {
+        store.dispatch('Storage/set', { sidebarShow: show })
+      },
+      get () {
+        return store.getters['Storage/get']('sidebarShow', 1)
+      }
     }
   }
 }
@@ -30,11 +38,11 @@ export default {
 
 <template>
   <div class="w-full h-full flex flex-col">
-    <menu-component ref="menu" :data="layout['menu']" class="grow-0 relative z-20 app-refs-menu"/>
+    <menu-component ref="menu" :data="layout['menu']" class="dark grow-0 relative z-20 app-refs-menu"/>
     <div class="grow-1 flex flex-row h-full overflow-hidden relative z-10">
       <sidebar ref="sidebar" :data="layout['sidebar']"
-               class="grow-0 shrink-0 w-72 flex flex-col border app-refs-sidebar"/>
-      <global-tabs class="flex grow basis-0 overflow-hidden border"/>
+               class="dark grow-0 shrink-0 w-72 flex flex-col app-refs-sidebar"/>
+      <global-tabs class="flex grow basis-0 overflow-hidden"/>
     </div>
   </div>
 </template>

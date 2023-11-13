@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <div class="grow h-0 overflow-hidden">
+    <div class="grow h-0 overflow-hidden border-t">
       <div class="cms-global-tabs__panel" ref="panel">
 
         <router-view v-slot="{ Component }">
@@ -174,10 +174,10 @@ export default {
   @apply h-16 flex flex-nowrap overflow-auto relative z-[2] py-0.5
 }
 .cms-global-tabs__pane a {
-  @apply h-8 mx-0.5 rounded inline-flex justify-between items-center relative select-none cursor-pointer transition
+  @apply h-8 mx-0.5 rounded inline-flex justify-between items-center relative select-none cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600 transition
 }
 .cms-global-tabs__pane .cms-global-tabs__active {
-  @apply bg-blue-600 text-white
+  @apply !bg-blue-600 !text-white
 }
 .cms-global-tabs__panel {
   @apply h-full overflow-auto

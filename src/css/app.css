@@ -33,7 +33,7 @@ html, body, #app {
     }
 
     body {
-        @apply text-gray-800 bg-white dark:text-gray-300 dark:bg-gray-700
+        @apply text-gray-800 bg-white dark:text-gray-50 dark:bg-gray-800
     }
 
     /**

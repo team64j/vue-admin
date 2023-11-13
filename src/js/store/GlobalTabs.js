@@ -26,7 +26,7 @@ const mutations = {
     data = router.resolve(data)
 
     if (data.meta['title'] === undefined) {
-      data.meta['title'] = data.name
+      data.meta['title'] = data.name + (data?.params?.id ? ' ' + data.params.id : '')
     }
 
     let is = false

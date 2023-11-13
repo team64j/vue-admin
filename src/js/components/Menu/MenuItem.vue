@@ -162,7 +162,7 @@ li > a, li > span {
   @apply flex items-center justify-between grow
 }
 li > a > *, li > span > * {
-  @apply pointer-events-none
+  @apply pointer-events-none select-none
 }
 li > a span, li > span span {
   @apply grow truncate
@@ -181,6 +181,9 @@ li[data-level="0"]:last-of-type > ul > li ul {
 }
 li[data-level="1"] > a, li[data-level="1"] > span {
   @apply rounded
+}
+li[data-level="1"] > ul {
+  @apply mt-1
 }
 li[data-level="1"] ul {
   @apply absolute hidden top-full left-0 flex-col min-w-[18rem] rounded py-1 shadow-lg bg-white dark:bg-gray-700

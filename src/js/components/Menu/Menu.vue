@@ -34,7 +34,9 @@ export default {
 </script>
 
 <template>
-  <ul class="flex justify-between">
-    <menu-item v-for="i in data" :data="i"/>
-  </ul>
+  <div>
+    <ul class="flex justify-between border-b text-gray-800 bg-white dark:text-gray-50 dark:bg-gray-800">
+      <menu-item v-for="i in data" :data="i"/>
+    </ul>
+  </div>
 </template>
