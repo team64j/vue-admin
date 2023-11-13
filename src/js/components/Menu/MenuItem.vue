@@ -31,7 +31,7 @@ export default {
         }
       }
 
-      icon = this.data['icon'] ?? null
+      icon = icon ?? this.data['icon'] ?? null
 
       if (icon) {
         return h('i', {
@@ -55,15 +55,19 @@ export default {
         })
       }
 
-      return this.data['data'] && this.level && h('i', {
+      return this.propData.length && this.level && h('i', {
         class: 'inline-flex items-center justify-center ml-1 text-sm opacity-70 toggle'
       }, h('i', { class: 'fa fa-chevron-down fa-fw leading-[0] transition' }))
     }
   },
   methods: {
     mouseenter () {
-      this.$el.parentElement.parentElement.querySelectorAll('li').forEach(i => {
-        i.classList.contains('hover') && i.classList.remove('hover')
+      if (this.$el.classList.contains('hover')) {
+        return
+      }
+
+      this.$el.parentElement.parentElement.querySelectorAll('li.hover').forEach(i => {
+        this.$el !== i && i.classList.remove('hover')
       })
 
       if (this.data['url']) {
@@ -117,7 +121,8 @@ export default {
 </script>
 
 <template>
-  <li :data-level="level" :class="[propData ? 'parent' : '']" @mouseenter="mouseenter" @mouseleave="mouseout">
+  <li :data-level="level" :class="{ parent: this.data['data']?.length }" @mouseenter="mouseenter" @mouseleave="mouseout">
+
     <a v-if="data['href']" :href="data['href']" target="_blank" class="transition">
       <component :is="icon"/>
       <component :is="title"/>
@@ -143,7 +148,7 @@ export default {
       <component :is="toggle"/>
     </span>
 
-    <ul v-if="propData">
+    <ul v-if="propData.length">
       <menu-item v-for="i in propData" :data="i" :level="level + 1"/>
     </ul>
   </li>
@@ -155,6 +160,9 @@ ul, li {
 }
 li > a, li > span {
   @apply flex items-center justify-between grow
+}
+li > a > *, li > span > * {
+  @apply pointer-events-none
 }
 li > a span, li > span span {
   @apply grow truncate
