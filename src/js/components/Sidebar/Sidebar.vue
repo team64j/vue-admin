@@ -1,4 +1,6 @@
 <script>
+import store from '../../store'
+
 export default {
   name: 'Sidebar',
   props: {
@@ -6,13 +8,12 @@ export default {
   },
   data () {
     return {
-      settings: this.$root.sidebar,
-      w: null,
+      w: store.getters['Storage/get']('sidebarWidth'),
       x: 0
     }
   },
   mounted () {
-    this.$el.style.width = this.settings?.width ? this.settings.width + 'px' : ''
+    this.$el.style.width = this.w ? this.w + 'px' : ''
   },
   methods: {
     resizerDown (event) {
@@ -22,7 +23,7 @@ export default {
     },
     resizerUp () {
       this.$refs.resizer.classList.remove('active')
-      this.$root.sidebar = { width: this.$root.$refs.sidebar.$el.offsetWidth }
+      store.dispatch('Storage/set', { sidebarWidth: this.$root.$refs.sidebar.$el.offsetWidth })
     },
     resizerMove (event) {
       let w = this.w + (event.clientX - this.x)
