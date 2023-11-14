@@ -14,6 +14,9 @@ export default {
         if (target.classList.contains('parent') || event.target.closest('a')) {
           this.$el.classList.toggle('active')
         }
+      } else if (target?.firstElementChild.classList.contains('pagination') ||
+          target?.firstElementChild.classList.contains('filter')) {
+
       } else {
         this.$el.classList.contains('active') && this.$el.classList.remove('active')
       }

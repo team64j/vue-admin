@@ -1,5 +1,6 @@
 <script>
 import { h } from 'vue'
+import { RouterLink } from 'vue-router'
 
 export default {
   name: 'MenuItem',
@@ -19,7 +20,10 @@ export default {
     }
   },
   computed: {
-    icon () {
+    node () {
+      let node
+      let slots = []
+
       let icon = null
       if (this.data['icons'] && this.$root[this.data['key']] !== undefined) {
         const key = this.$root[this.data['key']].toString()
@@ -33,68 +37,129 @@ export default {
 
       icon = icon ?? this.data['icon'] ?? null
 
+      // icon
       if (icon) {
-        return h('i', {
+        slots.push(h('i', {
           class: icon
-        })
-      }
-    },
-    title () {
-      return this.data['name'] && h('span', this.data['name']) || null
-    },
-    locked () {
-      return this.data['locked'] && h('i', { class: 'fa fa-lock text-rose-500 text-sm leading-[0]' }) || null
-    },
-    id () {
-      return this.data['id'] !== undefined ? h('span', this.data['id']) : null
-    },
-    toggle () {
-      if (this.loading) {
-        return h('i', {
-          class: 'fa fa-circle-notch fa-fw animate-spin'
-        })
+        }))
       }
 
-      return this.propData.length && this.level && h('i', {
-        class: 'inline-flex items-center justify-center ml-1 text-sm opacity-70 toggle'
-      }, h('i', { class: 'fa fa-chevron-down fa-fw leading-[0] transition' }))
+      // title
+      if (this.data['name']) {
+        slots.push(h('span', this.data['name']))
+      }
+
+      // locked
+      if (this.data['locked']) {
+        slots.push(h('i', { class: 'fa fa-lock text-rose-500 text-sm leading-[0]' }))
+      }
+
+      // id
+      if (this.data['id'] !== undefined) {
+        slots.push(h('span', this.data['id']))
+      }
+
+      // toggle
+      if (this.loading) {
+        slots.push(h('i', { class: 'fa fa-circle-notch fa-fw animate-spin' }))
+      } else if (this.propData.length && this.level) {
+        slots.push(h('i', {
+          class: 'inline-flex items-center justify-center ml-1 text-sm opacity-70 toggle'
+        }, h('i', { class: 'fa fa-chevron-down fa-fw leading-[0] transition' })))
+      }
+
+      if (this.data['href']) {
+        node = h('a', {
+          class: 'transition',
+          href: this.data['href'],
+          target: '_blank'
+        }, slots)
+      } else if (this.data['to']) {
+        node = h(RouterLink, {
+          class: 'transition',
+          to: this.data['to']
+        }, () => slots)
+      } else if (this.data['prev'] || this.data['next']) {
+        slots = []
+
+        // prev
+        slots.push(h('i', {
+          class: 'fa fa-chevron-left px-2 py-1 rounded text-blue-500' + (!this.data['prev']
+              ? ' opacity-20 pointer-events-none'
+              : ' cursor-pointer hover:text-blue-600 hover:bg-white/10'),
+          onClick: () => {
+            if (this.data['prev']) {
+              this.$parent.get(this.data['prev'])
+            }
+          }
+        }))
+
+        // total info
+        slots.push(h('span', {
+          class: 'grow text-center opacity-80',
+          innerHTML: this.data['info'] ?? this.data['total']
+        }))
+
+        // next
+        slots.push(h('i', {
+          class: 'fa fa-chevron-right px-2 py-1 rounded text-blue-500' + (!this.data['next']
+              ? ' opacity-20 pointer-events-none'
+              : ' cursor-pointer hover:text-blue-600 hover:bg-white/10'),
+          onClick: () => {
+            if (this.data['next']) {
+              this.$parent.get(this.data['next'])
+            }
+          }
+        }))
+
+        node = h('div', {
+          class: 'pagination flex justify-between items-center w-full px-3 py-2 select-none'
+        }, slots)
+      } else if (this.data['filter'] !== undefined) {
+        slots = [
+          h('input', {
+            type: 'text',
+            class: 'px-2 pt-1 pb-0.5 mx-3 my-1',
+            value: this.data['filter'],
+            onInput: (event) => {
+              clearTimeout(this.timer)
+              this.timer = setTimeout(() => this.$parent.get(null, { filter: event.target.value }), 200)
+            }
+          })]
+
+        if (this.data['filter']) {
+          slots.push(h('i', {
+            class: 'fa fa-remove text-rose-500 cursor-pointer absolute top-3 right-5',
+            onClick: () => this.$parent.get()
+          }))
+        }
+
+        node = h('div', {
+          class: 'filter flex w-full relative'
+        }, slots)
+      } else {
+        node = h('span', {
+          class: 'transition' + (this.data['click'] || this.data['icons'] ? ' cursor-pointer' : ''),
+          onClick: () => this.onClick(this.data)
+        }, slots)
+      }
+
+      return node
     }
   },
   methods: {
     mouseenter () {
+      this.$el.parentElement.querySelectorAll(':scope > li.hover').forEach(i => {
+        this.$el !== i && i.classList.remove('hover')
+      })
+
       if (this.$el.classList.contains('hover')) {
         return
       }
 
-      this.$el.parentElement.parentElement.querySelectorAll('li.hover').forEach(i => {
-        this.$el !== i && i.classList.remove('hover')
-      })
-
       if (this.data['url']) {
         clearTimeout(this.timer)
-
-        this.timer = setTimeout(() => {
-          this.loading = true
-
-          this.propData = []
-
-          axios.get(this.data['url']).then(r => {
-            this.propData = this.propData.concat(this.data['data'], (r.data['data'] || []).map(i => {
-              i.to = {
-                name: this.data['name'],
-                params: {
-                  id: i.id
-                }
-              }
-
-              return i
-            }))
-
-            this.$el.classList.add('hover')
-          }).finally(() => {
-            this.loading = false
-          })
-        }, 200)
+        this.timer = setTimeout(() => this.get(this.data['url']), 200)
       } else {
         this.$el.classList.add('hover')
       }
@@ -115,6 +180,45 @@ export default {
       if (this.data['click'] && this.$root[this.data['click']]) {
         return this.$root[this.data['click']]()
       }
+    },
+    get (url, params = {}) {
+      url ??= this.data['url']
+      this.loading = true
+
+      this.propData = []
+
+      axios.get(url, {
+        params: params
+      }).then(r => {
+        const filter = [
+          {
+            filter: params?.filter ?? ''
+          }]
+
+        this.propData = this.propData.concat(this.data['data'], filter, (r.data['data'] || []).map(i => {
+          i.to = {
+            name: this.data['name'],
+            params: {
+              id: i.id
+            }
+          }
+
+          return i
+        }))
+
+        if (r.data['meta']?.['pagination']?.['prev'] || r.data['meta']?.['pagination']?.['next']) {
+          this.propData.push({
+            total: r.data['meta']['pagination']['total'] ?? null,
+            info: r.data['meta']['pagination']['info'] ?? null,
+            prev: r.data['meta']['pagination']['prev'] ?? null,
+            next: r.data['meta']['pagination']['next'] ?? null
+          })
+        }
+
+        this.$el.classList.add('hover')
+      }).finally(() => {
+        this.loading = false
+      })
     }
   }
 }
@@ -123,30 +227,7 @@ export default {
 <template>
   <li :data-level="level" :class="{ parent: this.data['data']?.length }" @mouseenter="mouseenter" @mouseleave="mouseout">
 
-    <a v-if="data['href']" :href="data['href']" target="_blank" class="transition">
-      <component :is="icon"/>
-      <component :is="title"/>
-      <component :is="locked"/>
-      <component :is="id"/>
-      <component :is="toggle"/>
-    </a>
-
-    <router-link v-else-if="data['to']" :to="data['to']" class="transition">
-      <component :is="icon"/>
-      <component :is="title"/>
-      <component :is="locked"/>
-      <component :is="id"/>
-      <component :is="toggle"/>
-    </router-link>
-
-    <span v-else @click="onClick(data)" :class="[ data['click'] || data['icons'] ? 'cursor-pointer' : '' ]"
-          class="transition">
-      <component :is="icon"/>
-      <component :is="title"/>
-      <component :is="locked"/>
-      <component :is="id"/>
-      <component :is="toggle"/>
-    </span>
+    <component :is="node"/>
 
     <ul v-if="propData.length">
       <menu-item v-for="i in propData" :data="i" :level="level + 1"/>
