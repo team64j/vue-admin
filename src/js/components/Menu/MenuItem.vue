@@ -150,8 +150,11 @@ export default {
   },
   methods: {
     mouseenter () {
-      this.$el.parentElement.querySelectorAll(':scope > li.hover').forEach(i => {
-        this.$el !== i && i.classList.remove('hover')
+      this.$parent.$el.querySelectorAll(':scope > ul > li.hover').forEach(i => {
+        if (this.$el !== i) {
+          i.classList.remove('hover')
+          i.querySelectorAll('li.hover').forEach(j => j.classList.remove('hover'))
+        }
       })
 
       if (this.$el.classList.contains('hover')) {
@@ -212,6 +215,13 @@ export default {
         }
 
         this.$el.classList.add('hover')
+
+        setTimeout(() => {
+          const input = this.$el.querySelector('input')
+          if (input) {
+            input.focus()
+          }
+        }, 100)
       }).finally(() => {
         this.loading = false
       })
@@ -221,7 +231,8 @@ export default {
 </script>
 
 <template>
-  <li :data-level="level" :class="{ parent: this.data['data']?.length }" @mouseenter="mouseenter"
+  <li :data-level="level" :class="{ parent: this.data['data']?.length }"
+      @mouseenter="mouseenter"
       @mouseleave="mouseout">
 
     <component :is="node"/>
@@ -264,10 +275,10 @@ li[data-level="1"] > ul {
   @apply mt-1
 }
 li[data-level="1"] ul {
-  @apply absolute hidden top-full left-0 flex-col min-w-[18rem] rounded py-1 shadow-lg bg-white dark:bg-gray-700
+  @apply absolute opacity-0 invisible top-full left-0 flex-col min-w-[18rem] rounded py-1 shadow-lg bg-white dark:bg-gray-700 transition
 }
 .active li[data-level="0"] li.hover > ul {
-  @apply flex shadow-lg
+  @apply opacity-100 visible
 }
 li[data-level="2"] ul {
   @apply left-full top-0
