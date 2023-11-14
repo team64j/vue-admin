@@ -183,7 +183,7 @@ export default {
       }
     },
     get (url = null, params = {}) {
-      const filter = [{ filter: params.filter || '' }]
+      const filter = [{ filter: params.filter ?? '' }]
       url ??= this.data['url']
       this.loading = true
       this.propData = this.data['data']
