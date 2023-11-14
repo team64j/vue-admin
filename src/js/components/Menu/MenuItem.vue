@@ -116,20 +116,21 @@ export default {
           class: 'pagination flex justify-between items-center w-full px-3 py-2 select-none'
         }, slots)
       } else if (this.data['filter'] !== undefined) {
-        slots = [
-          h('input', {
-            type: 'text',
-            class: 'px-2 pt-1 pb-0.5 mx-3 my-1',
-            value: this.data['filter'],
-            onInput: (event) => {
-              clearTimeout(this.timer)
-              this.timer = setTimeout(() => this.$parent.get(null, { filter: event.target.value }), 200)
-            }
-          })]
+        slots = []
+
+        slots.push(h('input', {
+          type: 'text',
+          class: 'px-2 pt-1 pb-0.5 mx-3 my-1',
+          value: this.data['filter'],
+          onInput: (event) => {
+            clearTimeout(this.timer)
+            this.timer = setTimeout(() => this.$parent.get(null, { filter: event.target.value }), 500)
+          }
+        }))
 
         if (this.data['filter']) {
           slots.push(h('i', {
-            class: 'fa fa-remove text-rose-500 cursor-pointer absolute top-3 right-5',
+            class: 'fa fa-remove text-rose-500 cursor-pointer absolute z-10 top-3 right-5',
             onClick: () => this.$parent.get()
           }))
         }
@@ -181,21 +182,16 @@ export default {
         return this.$root[this.data['click']]()
       }
     },
-    get (url, params = {}) {
+    get (url = null, params = {}) {
+      const filter = [{ filter: params.filter || '' }]
       url ??= this.data['url']
       this.loading = true
-
-      this.propData = []
+      this.propData = this.data['data']
 
       axios.get(url, {
         params: params
       }).then(r => {
-        const filter = [
-          {
-            filter: params?.filter ?? ''
-          }]
-
-        this.propData = this.propData.concat(this.data['data'], filter, (r.data['data'] || []).map(i => {
+        this.propData = this.propData.concat(filter, (r.data['data'] || []).map(i => {
           i.to = {
             name: this.data['name'],
             params: {
@@ -225,7 +221,8 @@ export default {
 </script>
 
 <template>
-  <li :data-level="level" :class="{ parent: this.data['data']?.length }" @mouseenter="mouseenter" @mouseleave="mouseout">
+  <li :data-level="level" :class="{ parent: this.data['data']?.length }" @mouseenter="mouseenter"
+      @mouseleave="mouseout">
 
     <component :is="node"/>
 
