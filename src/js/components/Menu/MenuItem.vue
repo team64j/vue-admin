@@ -119,15 +119,11 @@ function onClick () {
 
 const classLI = computed(() => {
   let c = ''
-  if (propData.value?.length || props.data?.['url']) {
+  if (props.data?.['data']?.length || props.data?.['url']) {
     c += 'parent'
   }
 
   return c
-})
-
-const classUL = computed(() => {
-
 })
 
 const node = computed(() => {
@@ -201,7 +197,7 @@ const node = computed(() => {
       disabled: props.data['prev'] ? undefined : 'disabled',
       onClick: () => {
         if (props.data['prev']) {
-          instance.$emit('loadData', props.data['prev'])
+          emit('loadData', props.data['prev'])
         }
       }
     }))
@@ -215,7 +211,7 @@ const node = computed(() => {
       disabled: props.data['next'] ? undefined : 'disabled',
       onClick: () => {
         if (props.data['next']) {
-          instance.$emit('loadData', props.data['next'])
+          emit('loadData', props.data['next'])
         }
       }
     }))
@@ -265,7 +261,7 @@ const node = computed(() => {
 
     <component :is="node"/>
 
-    <ul v-if="propData?.length" :class="classUL">
+    <ul v-if="propData?.length">
       <menu-item v-for="i in propData" :data="i" :level="level + 1" @loadData="loadData"/>
     </ul>
   </li>
