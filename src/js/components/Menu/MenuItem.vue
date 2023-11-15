@@ -16,13 +16,23 @@ export default {
       active: false,
       timer: 0,
       loading: false,
-      propData: this.data['data'] || []
+      propData: this.data['data'] || [],
+      filter: ''
     }
   },
   computed: {
     node () {
       let node
       let slots = []
+      let nodeClass = 'flex items-center justify-between grow transition'
+
+      if (this.level) {
+        nodeClass += ' py-2 px-4'
+      }
+
+      if (this.level === 1) {
+        nodeClass += ' my-1 rounded'
+      }
 
       let icon = null
       if (this.data['icons'] && this.$root[this.data['key']] !== undefined) {
@@ -46,37 +56,48 @@ export default {
 
       // title
       if (this.data['name']) {
-        slots.push(h('span', this.data['name']))
+        slots.push(h('span', {
+          class: 'grow truncate' + (icon ? ' ml-2' : ''),
+          innerText: this.data['name']
+        }))
       }
 
       // locked
       if (this.data['locked']) {
-        slots.push(h('i', { class: 'fa fa-lock text-rose-500 text-sm leading-[0]' }))
+        slots.push(h('i', { class: 'fa fa-lock text-rose-500 text-sm leading-[0] ml-1' }))
       }
 
       // id
       if (this.data['id'] !== undefined) {
-        slots.push(h('span', this.data['id']))
+        slots.push(h('span', {
+          class: 'ml-1 grow-0 opacity-70',
+          innerText: this.data['id']
+        }))
       }
 
       // toggle
       if (this.loading) {
-        slots.push(h('i', { class: 'fa fa-circle-notch fa-fw animate-spin' }))
+        slots.push(h('i', { class: 'fa fa-circle-notch fa-fw animate-spin ml-2' }))
       } else if (this.propData.length && this.level) {
-        slots.push(h('i', {
-          class: 'inline-flex items-center justify-center ml-1 text-sm opacity-70 toggle'
-        }, h('i', { class: 'fa fa-chevron-down fa-fw leading-[0] transition' })))
+        slots.push(h('span', {
+          class: 'inline-flex items-center justify-center ml-2 h-full text-sm opacity-70 toggle',
+          onClick: (event) => {
+            if (window.innerWidth < 769) {
+              //event.preventDefault()
+            }
+          }
+        }, h('i', { class: 'fa fa-chevron-down fa-fw leading-[0] pointer-events-none transition' })))
       }
 
       if (this.data['href']) {
         node = h('a', {
-          class: 'transition',
+          class: nodeClass,
           href: this.data['href'],
           target: '_blank'
         }, slots)
       } else if (this.data['to']) {
         node = h(RouterLink, {
-          class: 'transition',
+          class: nodeClass,
           to: this.data['to']
         }, () => slots)
       } else if (this.data['prev'] || this.data['next']) {
@@ -112,40 +133,84 @@ export default {
           }
         }))
 
+        nodeClass += ' pagination px-3 py-2 select-none'
+
         node = h('div', {
-          class: 'pagination flex justify-between items-center w-full px-3 py-2 select-none'
+          class: nodeClass
         }, slots)
       } else if (this.data['filter'] !== undefined) {
         slots = []
 
         slots.push(h('input', {
           type: 'text',
-          class: 'px-2 pt-1 pb-0.5 mx-3 my-1',
+          class: '-my-1 pl-2 pr-6 pt-1 pb-0.5',
           value: this.data['filter'],
           onInput: (event) => {
+            this.$parent.filter = event.target.value
             clearTimeout(this.timer)
-            this.timer = setTimeout(() => this.$parent.get(null, { filter: event.target.value }), 500)
+            this.timer = setTimeout(() => {
+              this.$parent.get()
+            }, 500)
           }
         }))
 
         if (this.data['filter']) {
           slots.push(h('i', {
-            class: 'fa fa-remove text-rose-500 cursor-pointer absolute z-10 top-3 right-5',
-            onClick: () => this.$parent.get()
+            class: 'fa fa-remove text-rose-500 cursor-pointer absolute z-10 top-3 right-6',
+            onClick: () => {
+              this.$parent.filter = ''
+              this.$parent.get()
+            }
           }))
         }
 
+        nodeClass += ' filter relative'
+
         node = h('div', {
-          class: 'filter flex w-full relative'
+          class: nodeClass
         }, slots)
       } else {
+        if (this.data['click'] || this.data['icons']) {
+          nodeClass += ' cursor-pointer'
+        }
+
         node = h('span', {
-          class: 'transition' + (this.data['click'] || this.data['icons'] ? ' cursor-pointer' : ''),
+          class: nodeClass,
           onClick: () => this.onClick(this.data)
         }, slots)
       }
 
       return node
+    },
+    classLI () {
+      let c = 'flex cursor-default'
+
+      if (this.data['data']?.length) {
+        c += ' parent'
+      }
+
+      if (this.level === 1) {
+        c += ' md:relative'
+      }
+
+      return c
+    },
+    classUL () {
+      let c = 'flex cursor-default'
+
+      if (this.level === 1) {
+        c += ' mt-1'
+      }
+
+      if (this.level) {
+        c += ' absolute opacity-0 invisible top-full left-0 flex-col min-w-full md:min-w-[18rem] rounded py-1 shadow-lg bg-white dark:bg-gray-700 transition'
+      }
+
+      if (this.level > 1) {
+        c += ' left-full !top-0 overflow-hidden overflow-y-auto'
+      }
+
+      return c
     }
   },
   methods: {
@@ -162,8 +227,10 @@ export default {
       }
 
       if (this.data['url']) {
-        clearTimeout(this.timer)
-        this.timer = setTimeout(() => this.get(this.data['url']), 200)
+        if (window.innerWidth > 768) {
+          clearTimeout(this.timer)
+          this.timer = setTimeout(() => this.get(this.data['url']), 200)
+        }
       } else {
         this.$el.classList.add('hover')
       }
@@ -186,15 +253,24 @@ export default {
       }
     },
     get (url = null, params = {}) {
-      const filter = [{ filter: params.filter ?? '' }]
       url ??= this.data['url']
       this.loading = true
       this.propData = this.data['data']
 
+      if (this.filter) {
+        params.filter = this.filter
+      }
+
       axios.get(url, {
         params: params
-      }).then(r => {
-        this.propData = this.propData.concat(filter, (r.data['data'] || []).map(i => {
+      }).then(({ data: data }) => {
+        const filter = []
+
+        if (data['meta']?.['pagination']['total'] > data['meta']?.['pagination']['page'] || this.filter) {
+          filter.push({ filter: this.filter || '' })
+        }
+
+        this.propData = this.propData.concat(filter, (data['data'] || []).map(i => {
           i.to = {
             name: this.data['name'],
             params: {
@@ -205,12 +281,12 @@ export default {
           return i
         }))
 
-        if (r.data['meta']?.['pagination']?.['prev'] || r.data['meta']?.['pagination']?.['next']) {
+        if (data['meta']?.['pagination']?.['prev'] || data['meta']?.['pagination']?.['next']) {
           this.propData.push({
-            total: r.data['meta']['pagination']['total'] ?? null,
-            info: r.data['meta']['pagination']['info'] ?? null,
-            prev: r.data['meta']['pagination']['prev'] ?? null,
-            next: r.data['meta']['pagination']['next'] ?? null
+            total: data['meta']['pagination']['total'] ?? null,
+            info: data['meta']['pagination']['info'] ?? null,
+            prev: data['meta']['pagination']['prev'] ?? null,
+            next: data['meta']['pagination']['next'] ?? null
           })
         }
 
@@ -231,57 +307,25 @@ export default {
 </script>
 
 <template>
-  <li :data-level="level" :class="{ parent: this.data['data']?.length }"
-      @mouseenter="mouseenter"
-      @mouseleave="mouseout">
+  <li :data-level="level" :class="classLI" @mouseenter="mouseenter" @mouseleave="mouseout">
 
     <component :is="node"/>
 
-    <ul v-if="propData.length">
+    <ul v-if="propData.length" :class="classUL">
       <menu-item v-for="i in propData" :data="i" :level="level + 1"/>
     </ul>
   </li>
 </template>
 
 <style scoped>
-ul, li {
-  @apply flex cursor-default
-}
-li > a, li > span {
-  @apply flex items-center justify-between grow
-}
-li > a > *, li > span > * {
+/*li > a > *, li > span > * {
   @apply pointer-events-none select-none
-}
-li > a span, li > span span {
-  @apply grow truncate
-}
-li > a span ~ span, li > span span ~ span {
-  @apply grow-0 opacity-70
-}
-li > span > i + span, li > a > i + span {
-  @apply ml-2
-}
-li[data-level="0"] {
-  @apply px-1 relative
-}
+}*/
 li[data-level="0"]:last-of-type > ul > li ul {
   @apply left-auto right-0
 }
-li[data-level="1"] > a, li[data-level="1"] > span {
-  @apply rounded
-}
-li[data-level="1"] > ul {
-  @apply mt-1
-}
-li[data-level="1"] ul {
-  @apply absolute opacity-0 invisible top-full left-0 flex-col min-w-[18rem] rounded py-1 shadow-lg bg-white dark:bg-gray-700 transition
-}
 .active li[data-level="0"] li.hover > ul {
   @apply opacity-100 visible
-}
-li[data-level="2"] ul {
-  @apply left-full top-0
 }
 .active li[data-level="1"].hover > a .toggle i, .active li[data-level="1"].hover > span .toggle i {
   @apply rotate-180
@@ -292,20 +336,10 @@ li[data-level="2"] > a .toggle i, li[data-level="2"] > span .toggle i {
 li[data-level="0"] li.hover > a, li[data-level="0"] li.hover > span {
   @apply bg-slate-100 dark:bg-gray-600
 }
-li[data-level="1"] {
-  @apply relative
-}
-li[data-level="1"] > a, li[data-level="1"] > span {
-  @apply py-2 px-4 my-1
-}
-li[data-level="1"] li > a, li[data-level="1"] li > span {
-  @apply py-2 px-4
-}
 li[data-level="1"] li > a:hover {
   @apply bg-blue-600 text-white dark:bg-blue-600
 }
-li[data-level="2"] ul {
-  @apply overflow-hidden overflow-y-auto;
+ul {
   max-height: calc(100vh - 3.5rem);
 }
 </style>

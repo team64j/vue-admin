@@ -3,6 +3,16 @@ import axios from 'axios'
 import store from './store'
 import router from './router'
 
+navigator.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 769
+
+if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+  document.documentElement.classList.add('ios')
+}
+
+if (navigator.mobile) {
+  document.documentElement.classList.add('mobile')
+}
+
 axios.defaults.headers.common['Accept'] = 'application/json'
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
