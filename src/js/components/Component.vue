@@ -208,10 +208,11 @@ function loadData () {
     params: props.currentRoute['query']
   }).then(({ data: r }) => Object.assign($data, r)).finally(() => {
     emit('action', 'setTab', {
-      meta: { title: $data.meta['title'] ?? '', icon: $data.meta['icon'] ?? '' },
       key: instance.vnode.key,
       changed: false,
-      loading: false
+      loading: false,
+      saving: false,
+      meta: { title: $data.meta['title'] ?? '', icon: $data.meta['icon'] ?? '' }
     })
   })
 }
@@ -221,6 +222,7 @@ onMounted(() => {
     key: instance.vnode.key,
     changed: false,
     loading: true,
+    saving: false,
     meta: { title: props.currentRoute?.['meta']?.title !== undefined ? props.currentRoute['meta'].title : '...' }
   })
 

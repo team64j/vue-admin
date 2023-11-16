@@ -3,7 +3,8 @@ import router from '../router'
 const state = {
   tabs: [],
   keys: [],
-  data: {}
+  data: {},
+  active: {}
 }
 
 const mutations = {
@@ -47,6 +48,7 @@ const mutations = {
     }
 
     state.keys = state.tabs.map(i => i.meta.group ? i.name : i.path)
+    state.active = state.tabs.filter(i => i.active)[0]
   },
 
   set (state, data) {
@@ -56,6 +58,7 @@ const mutations = {
     } else {
       state.tabs.map(i => i.active && window._.mergeWith(i, data))
     }
+    state.active = state.tabs.filter(i => i.active)[0]
   },
 
   del (state, data, callback) {
@@ -77,6 +80,7 @@ const mutations = {
 
     if (data.active && index > 0 && state.tabs[index - 1]) {
       state.tabs[index - 1].active = true
+      state.active = state.tabs[index - 1]
       router.push(state.tabs[index - 1]).then(() => {
         if (typeof callback === 'function') {
           callback()
@@ -91,6 +95,7 @@ const mutations = {
     this.commit('set', { treeSelect: false })
 
     index > -1 && state.tabs.splice(index, 1) && state.keys.splice(index, 1)
+    state.active = state.tabs.filter(i => i.active)[0]
 
     return index
   },
@@ -99,6 +104,7 @@ const mutations = {
     state.tabs = []
     state.keys = []
     state.data = {}
+    state.active = {}
   },
 
   to (state, data) {
@@ -186,6 +192,8 @@ const getters = {
 
     return tab && !Object.values(data.query).length && Object.values(tab.query).length && tab || false
   },
+
+  active: (state) => state.active,
 
   find: (state) => (data) => {
     return state.tabs.filter(i => i.meta.group ? i.name === data.name : i.path === data.path)[0] ||
