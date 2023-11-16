@@ -1,8 +1,16 @@
 <script setup>
-import { compile, computed, h, nextTick } from 'vue'
+import { compile, computed, getCurrentInstance, h, nextTick, onMounted, reactive } from 'vue'
 
+const instance = getCurrentInstance()
 const props = defineProps(['data', 'meta', 'layout', 'errors', 'loaderDelay', 'currentRoute', 'class'])
 const emit = defineEmits(['action', 'update:modelValue'])
+const $data = reactive({
+  url: props.currentRoute?.['meta']?.['url'] ? props.currentRoute['meta']['url'] : props.currentRoute['path'],
+  data: null,
+  meta: null,
+  layout: null,
+  errors: null
+})
 
 const loaderDelay = props['loaderDelay'] || 0
 let renderLayout = computed(init)
@@ -36,20 +44,20 @@ function action () {
 
 function setValue (key, value) {
   if (~key.indexOf('.')) {
-    if (props['data'][key] !== undefined) {
-      props['data'][key] = value
+    if ($data.data[key] !== undefined) {
+      $data.data[key] = value
     } else {
-      setData(key.split('.'), value, props, true)
+      setData(key.split('.'), value, $data, true)
     }
   } else {
-    props['data'][key] = value
+    $data.data[key] = value
   }
 }
 
 function findData (keys, data) {
   let obj = {}
 
-  data = data || props
+  data = data || $data
 
   keys.forEach((key, index) => {
     if (data[key] !== undefined) {
@@ -138,19 +146,19 @@ function createComponent (data, setAction) {
   attrs.modelValue = attrs.value
 
   if (component.props?.['error'] || component?.extends?.props?.['error']) {
-    attrs.error = props['errors']?.[attrs.key]
+    attrs.error = $data['errors']?.[attrs.key]
   }
 
   if (component.props?.['currentRoute'] || component?.extends?.props?.['currentRoute']) {
-    attrs.currentRoute = props['currentRoute']
+    attrs.currentRoute = $data['currentRoute']
   }
 
   if (setAction || component.props?.['modelValue'] || component?.extends?.props?.['modelValue']) {
     attrs.onAction = action
   }
 
-  if (props['data']?.[attrs.key] !== undefined) {
-    attrs.modelValue = props['data'][attrs.key]
+  if ($data.data?.[attrs.key] !== undefined) {
+    attrs.modelValue = $data.data[attrs.key]
   } else if (~attrs.key.indexOf('.')) {
     attrs.modelValue = findData(attrs.key.split('.'))
   }
@@ -159,7 +167,7 @@ function createComponent (data, setAction) {
 }
 
 function setLayoutData (data) {
-  data = data || props['layout']
+  data = data || $data['layout']
 
   for (let i in data) {
     if (typeof data[i]?.data === 'string') {
@@ -184,10 +192,48 @@ function setLayoutData (data) {
 function init () {
   return h('div', { class: 'layout' }, initData(null, true))
 }
+
+function loadData () {
+  $data.data = null
+  $data.meta = null
+  $data.errors = null
+
+  if (!props.currentRoute['meta']['group']) {
+    $data.layout = null
+  }
+
+  axios.get($data.url, {
+    urlParams: props.currentRoute['params'],
+    params: props.currentRoute['query']
+  }).then(({ data: r }) => {
+    $data.data = r.data ?? null
+    $data.meta = r.meta ?? null
+    $data.layout = r.layout ?? null
+    $data.errors = r.errors ?? null
+  }).finally(() => {
+    emit('action', 'setTab', {
+      meta: { title: $data.meta['title'] ?? '', icon: $data.meta['icon'] ?? '' },
+      key: instance.vnode.key,
+      changed: false,
+      loading: false
+    })
+  })
+}
+
+onMounted(() => {
+  emit('action', 'setTab', {
+    key: instance.vnode.key,
+    changed: false,
+    loading: true,
+    meta: { title: props.currentRoute?.['meta']?.title !== undefined ? props.currentRoute['meta'].title : '...' }
+  })
+
+  loadData()
+})
 </script>
 
 <template>
-  <component v-if="layout" :is="renderLayout"/>
+  <component v-if="$data.layout" :is="renderLayout"/>
 </template>
 
 <style>

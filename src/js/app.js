@@ -34,13 +34,15 @@ if (store.getters['Storage/get']('token')) {
       window.Vue.use(router)
       window.Vue.use(store)
 
-      const components = import.meta.glob('./components/!*!/!*.vue', { eager: true })
+      const components = import.meta.glob('./components/*/*.vue', { eager: true })
 
       Object.entries(components).forEach(([path, { default: module }]) => {
         const name = path.replace(/\.\/components\/(.*?)\/\w+\.vue/, '$1')
 
         if (module.name === name) {
-          window.Vue.component('Vue' + module.name, module)
+          window.Vue.component(module.name, module)
+        } else if (module.name && !~module.name.indexOf(name)) {
+          window.Vue.component(name + module.name, module)
         }
       })
 
