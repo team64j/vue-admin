@@ -60,17 +60,20 @@ export default {
 .app-menu > ul > li > ul > li > * {
   @apply rounded
 }
-.app-menu > ul > li li.hover > span {
+.app-menu > ul > li li.hover > a, .app-menu > ul > li li.hover > span {
   @apply bg-slate-100 dark:bg-gray-600
 }
 .app-menu li > a, .app-menu li > span {
   @apply flex items-center py-2 px-4 w-full h-full
 }
-.app-menu li.hover > a {
+.app-menu > ul > li > ul > li li.hover > a {
   @apply bg-blue-600 text-white dark:bg-blue-600
 }
 .app-menu li .icon {
-
+  @apply w-5 text-center
+}
+.app-menu li img {
+  @apply -my-1 -mx-1.5 max-w-none max-h-none h-8 w-auto block relative
 }
 .app-menu li .title {
   @apply grow
@@ -78,8 +81,17 @@ export default {
 .app-menu li .icon + .title {
   @apply ml-3
 }
+.app-menu li .locked {
+  @apply text-rose-500 text-sm leading-[0] ml-2
+}
+.app-menu li .id {
+  @apply ml-2
+}
 .app-menu li .toggle {
-  @apply transition ml-2
+  @apply ml-2 inline-flex items-center justify-center h-full opacity-70
+}
+.app-menu li .toggle i {
+  @apply text-sm pointer-events-none transition
 }
 .app-menu li .pagination {
   @apply flex grow items-center px-3 py-2 select-none

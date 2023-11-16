@@ -39,8 +39,9 @@ function loadData (url, params = {}, f) {
     params: params
   }).then(({ data: data }) => {
     const filterData = []
+    const pagination = data['meta']['pagination'] ?? {}
 
-    if (data['meta']?.['pagination']?.['total'] > data['meta']?.['pagination']?.['page'] || filter) {
+    if (pagination?.['total'] > pagination?.['page'] || filter) {
       filterData.push({ filter: filter || '' })
     }
 
@@ -55,12 +56,12 @@ function loadData (url, params = {}, f) {
       return i
     }))
 
-    if (data['meta']?.['pagination']?.['prev'] || data['meta']?.['pagination']?.['next']) {
+    if (pagination?.['prev'] || pagination?.['next']) {
       propData.value.push({
-        total: data['meta']['pagination']['total'] ?? null,
-        info: data['meta']['pagination']['info'] ?? null,
-        prev: data['meta']['pagination']['prev'] ?? null,
-        next: data['meta']['pagination']['next'] ?? null
+        total: pagination['total'] ?? null,
+        info: pagination['info'] ?? null,
+        prev: pagination['prev'] ?? null,
+        next: pagination['next'] ?? null
       })
     }
 
@@ -145,9 +146,15 @@ const node = computed(() => {
 
   // icon
   if (icon) {
-    slots.push(h('i', {
-      class: 'icon ' + icon
-    }))
+    if (/^http/.test(icon)) {
+      slots.push(h('img', {
+        src: icon
+      }))
+    } else {
+      slots.push(h('i', {
+        class: 'icon ' + icon
+      }))
+    }
   }
 
   // title
@@ -160,7 +167,7 @@ const node = computed(() => {
 
   // locked
   if (props.data['locked']) {
-    slots.push(h('i', { class: 'locked fa fa-lock text-rose-500 text-sm leading-[0] ml-1' }))
+    slots.push(h('i', { class: 'locked fa fa-lock' }))
   }
 
   // id
@@ -175,8 +182,8 @@ const node = computed(() => {
     slots.push(h('i', { class: 'fa fa-circle-notch fa-fw animate-spin ml-2' }))
   } else if ((props.data['data']?.length && props.level) || props.data['url']) {
     slots.push(h('span', {
-      class: 'toggle inline-flex items-center justify-center ml-2 h-full text-sm opacity-70'
-    }, h('i', { class: 'fa fa-chevron-down fa-fw leading-[0] pointer-events-none transition' })))
+      class: 'toggle'
+    }, h('i', { class: 'fa fa-chevron-down' })))
   }
 
   if (props.data['href']) {
