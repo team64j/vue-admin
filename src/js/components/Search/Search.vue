@@ -62,7 +62,7 @@ const methods = {
       <div class="app-search__back" @click="methods.onClose"/>
       <div class="app-search__main">
         <div class="app-search__input">
-          <input type="text" placeholder="Enter to Search, Ctr+F to show or Escape to close"
+          <input type="text" name="search" placeholder="Enter to Search, Ctr+F to show or Escape to close"
                  class="input-lg text-2xl border-0 border-b-2 rounded-none"
                  :value="data.search"
                  @input="methods.onInput">
