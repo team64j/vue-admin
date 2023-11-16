@@ -39,7 +39,7 @@ export default {
 </script>
 
 <template>
-  <div class="relative overflow-hidden" :class="[ $root.sidebarShow ? '' : '!w-0']">
+  <div class="app-sidebar relative overflow-hidden" :class="[ $root.sidebarShow ? '' : '!w-0']">
     <div class="text-gray-800 bg-white dark:text-gray-50 dark:bg-gray-800 h-full flex border-r">Sidebar</div>
     <div class="sidebar-resizer absolute top-0 right-0 h-full w-1"
          ref="resizer"
