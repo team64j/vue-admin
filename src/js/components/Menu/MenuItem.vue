@@ -1,5 +1,5 @@
 <script setup>
-import { computed, getCurrentInstance, h, ref } from 'vue'
+import { computed, getCurrentInstance, h, nextTick, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const props = defineProps({
@@ -15,7 +15,7 @@ const props = defineProps({
 
 const emit = defineEmits(['loadData'])
 
-const instance = getCurrentInstance()['ctx']
+const instance = getCurrentInstance()
 
 let timer = 0
 let filter
@@ -65,26 +65,28 @@ function loadData (url, params = {}, f) {
       })
     }
 
-    instance.$nextTick(() => {
-      const input = instance.$el.querySelector('input')
+    nextTick(() => {
+      const input = instance.vnode.el.querySelector('input')
       if (input) {
         input.focus()
       }
     })
-  }).finally(() => {
+
+    loading.value = false
+  }).catch(() => {
     loading.value = false
   })
 }
 
 function onEnter () {
-  instance.$parent.$el.querySelectorAll(':scope > ul > li.hover').forEach(i => {
-    if (instance.$el !== i) {
-      i.classList.remove('hover')
-      i.querySelectorAll('li.hover').forEach(j => j.classList.remove('hover'))
+  instance.parent.vnode.el.querySelectorAll(':scope > ul > li.app-menu__hover').forEach(i => {
+    if (instance.vnode.el !== i) {
+      i['classList'].remove('app-menu__hover')
+      i['querySelectorAll']('li.app-menu__hover').forEach(j => j.classList.remove('app-menu__hover'))
     }
   })
 
-  if (instance.$el.classList.contains('hover')) {
+  if (instance.vnode.el.classList.contains('app-menu__hover')) {
     return
   }
 
@@ -94,7 +96,7 @@ function onEnter () {
     timer = setTimeout(() => loadData(props.data['url']), 200)
   }
 
-  instance.$el.classList.add('hover')
+  instance.vnode.el.classList.add('app-menu__hover')
 }
 
 function onOut () {
@@ -104,24 +106,30 @@ function onOut () {
 }
 
 function onClick () {
-  if (props.data['icons'] && instance.$root[props.data['key']] !== undefined) {
-    const key = instance.$root[props.data['key']].toString()
+  if (props.data['icons'] && instance.root.proxy[props.data['key']] !== undefined) {
+    const key = instance.root.proxy[props.data['key']].toString()
+    let isset = false
     for (const i in props.data['icons']) {
       if (i === key) {
-        instance.$root[props.data['key']] = props.data['icons'][i]['value']
+        instance.root.proxy[props.data['key']] = props.data['icons'][i]['value']
+        isset = true
+        break
       }
+    }
+    if (!isset) {
+      instance.root.proxy[props.data['key']] = undefined
     }
   }
 
-  if (props.data['click'] && instance.$root[props.data['click']]) {
-    return instance.$root[props.data['click']]()
+  if (props.data['click'] && instance.root.proxy[props.data['click']]) {
+    return instance.root.proxy[props.data['click']]()
   }
 }
 
 const classLI = computed(() => {
   let c = ''
   if (props.data?.['data']?.length || props.data?.['url']) {
-    c += 'parent'
+    c += 'app-menu__parent'
   }
 
   return c
@@ -132,8 +140,8 @@ const node = computed(() => {
   let slots = []
 
   let icon = null
-  if (props.data['icons'] && instance.$root[props.data['key']] !== undefined) {
-    const key = instance.$root[props.data['key']].toString()
+  if (props.data['icons'] && instance.root.proxy[props.data['key']] !== undefined) {
+    const key = instance.root.proxy[props.data['key']].toString()
     for (const i in props.data['icons']) {
       if (i === key) {
         icon = props.data['icons'][i]['key']
@@ -146,13 +154,13 @@ const node = computed(() => {
 
   // icon
   if (icon) {
-    if (/^http/.test(icon)) {
+    if (/^https?:\/\/?/.test(icon)) {
       slots.push(h('img', {
         src: icon
       }))
     } else {
       slots.push(h('i', {
-        class: 'icon ' + icon
+        class: 'app-menu__icon ' + icon
       }))
     }
   }
@@ -160,31 +168,31 @@ const node = computed(() => {
   // title
   if (props.data['name']) {
     slots.push(h('span', {
-      class: 'title',
+      class: 'app-menu__title',
       innerText: props.data['name']
     }))
   }
 
   // locked
   if (props.data['locked']) {
-    slots.push(h('i', { class: 'locked fa fa-lock' }))
+    slots.push(h('i', { class: 'app-menu__locked fa fa-lock' }))
   }
 
   // id
   if (props.data['id'] !== undefined) {
     slots.push(h('span', {
-      class: 'id',
+      class: 'app-menu__id',
       innerText: props.data['id']
     }))
   }
 
   if (loading.value) {
     slots.push(h('span', {
-      class: 'toggle'
+      class: 'app-menu__toggle'
     }, h('i', { class: 'fa fa-circle-notch fa-fw animate-spin' })))
   } else if ((props.data['data']?.length && props.level) || props.data['url']) {
     slots.push(h('span', {
-      class: 'toggle'
+      class: 'app-menu__toggle'
     }, h('i', { class: 'fa fa-chevron-down fa-fw' })))
   }
 
@@ -202,7 +210,7 @@ const node = computed(() => {
 
     // prev
     slots.push(h('i', {
-      class: 'fa fa-chevron-left prev',
+      class: 'fa fa-chevron-left app-menu__prev',
       disabled: props.data['prev'] ? undefined : 'disabled',
       onClick: () => {
         if (props.data['prev']) {
@@ -216,7 +224,7 @@ const node = computed(() => {
 
     // next
     slots.push(h('i', {
-      class: 'fa fa-chevron-right next',
+      class: 'fa fa-chevron-right app-menu__next',
       disabled: props.data['next'] ? undefined : 'disabled',
       onClick: () => {
         if (props.data['next']) {
@@ -226,7 +234,7 @@ const node = computed(() => {
     }))
 
     node = h('div', {
-      class: 'pagination'
+      class: 'app-menu__pagination'
     }, [slots])
   } else if (props.data['filter'] !== undefined) {
     slots = []
@@ -235,6 +243,7 @@ const node = computed(() => {
       type: 'text',
       name: 'filter',
       value: props.data['filter'],
+      placeholder: 'filter ...',
       onInput: (event) => {
         clearTimeout(timer)
         timer = setTimeout(() => {
@@ -245,7 +254,7 @@ const node = computed(() => {
 
     if (props.data['filter']) {
       slots.push(h('i', {
-        class: 'fa fa-remove clear',
+        class: 'fa fa-remove app-menu__clear',
         onClick: () => {
           emit('loadData', null, {}, '')
         }
@@ -253,7 +262,7 @@ const node = computed(() => {
     }
 
     node = h('div', {
-      class: 'filter'
+      class: 'app-menu__filter'
     }, [slots])
   } else if (slots.length) {
     node = h('span', {
