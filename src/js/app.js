@@ -38,11 +38,12 @@ if (store.getters['Storage/get']('token')) {
 
       Object.entries(components).forEach(([path, { default: module }]) => {
         const name = path.replace(/\.\/components\/(.*?)\/\w+\.vue/, '$1')
+        const moduleName = module.name ?? module.__name
 
-        if (module.name === name) {
-          window.Vue.component(module.name, module)
-        } else if (module.name && !~module.name.indexOf(name)) {
-          window.Vue.component(name + module.name, module)
+        if (moduleName === name) {
+          window.Vue.component(moduleName, module)
+        } else if (moduleName && !~moduleName.indexOf(name)) {
+          window.Vue.component(name + moduleName, module)
         }
       })
 

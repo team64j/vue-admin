@@ -2,7 +2,7 @@
 import { compile, computed, getCurrentInstance, h, nextTick, onMounted, reactive } from 'vue'
 
 const instance = getCurrentInstance()
-const props = defineProps(['data', 'meta', 'layout', 'errors', 'loaderDelay', 'currentRoute', 'class'])
+const props = defineProps(['currentRoute'])
 const emit = defineEmits(['action', 'update:modelValue'])
 const $data = reactive({
   url: props.currentRoute?.['meta']?.['url'] ? props.currentRoute['meta']['url'] : props.currentRoute['path'],
@@ -12,7 +12,6 @@ const $data = reactive({
   errors: null
 })
 
-const loaderDelay = props['loaderDelay'] || 0
 let renderLayout = computed(init)
 
 function updateModelValue (value, instance) {
@@ -141,7 +140,7 @@ function createComponent (data, setAction) {
     return
   }
 
-  attrs.key = data.model || data.component.name || ''
+  attrs.key = data['model'] || data.component.name || ''
   attrs['onUpdate:modelValue'] = updateModelValue
   attrs.modelValue = attrs.value
 
@@ -190,7 +189,9 @@ function setLayoutData (data) {
 }
 
 function init () {
-  return h('div', { class: 'layout' }, initData(null, true))
+  return h('div', {
+    class: 'flex w-full h-full flex-wrap flex-col overflow-hidden'
+  }, initData(null, true))
 }
 
 function loadData () {
@@ -205,12 +206,7 @@ function loadData () {
   axios.get($data.url, {
     urlParams: props.currentRoute['params'],
     params: props.currentRoute['query']
-  }).then(({ data: r }) => {
-    $data.data = r.data ?? null
-    $data.meta = r.meta ?? null
-    $data.layout = r.layout ?? null
-    $data.errors = r.errors ?? null
-  }).finally(() => {
+  }).then(({ data: r }) => Object.assign($data, r)).finally(() => {
     emit('action', 'setTab', {
       meta: { title: $data.meta['title'] ?? '', icon: $data.meta['icon'] ?? '' },
       key: instance.vnode.key,
@@ -235,9 +231,3 @@ onMounted(() => {
 <template>
   <component v-if="$data.layout" :is="renderLayout"/>
 </template>
-
-<style>
-.layout {
-  @apply flex w-full h-full flex-wrap flex-col overflow-hidden
-}
-</style>
