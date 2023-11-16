@@ -22,107 +22,106 @@ let filter
 let loading = ref(false)
 let propData = ref(props.data?.['url'] ? [] : (props.data?.['data'] || []))
 
-function loadData (url, params = {}, f) {
-  url ??= props.data['url']
-  loading.value = true
-  propData.value = []
+const methods = {
+  loadData (url, params = {}, f) {
+    url ??= props.data['url']
+    loading.value = true
+    propData.value = []
 
-  if (f !== undefined) {
-    filter = f
-  }
-
-  if (filter !== undefined) {
-    params.filter = filter
-  }
-
-  axios.get(url, {
-    params: params
-  }).then(({ data: data }) => {
-    const filterData = []
-    const pagination = data['meta']['pagination'] ?? {}
-
-    if (pagination?.['total'] > pagination?.['page'] || filter) {
-      filterData.push({ filter: filter || '' })
+    if (f !== undefined) {
+      filter = f
     }
 
-    propData.value = [].concat(props.data['data'], filterData, (data['data'] || []).map(i => {
-      i.to = {
-        name: props.data['name'],
-        params: {
-          id: i.id
-        }
+    if (filter !== undefined) {
+      params.filter = filter
+    }
+
+    axios.get(url, {
+      params: params
+    }).then(({ data: data }) => {
+      const filterData = []
+      const pagination = data['meta']['pagination'] ?? {}
+
+      if (pagination?.['total'] > pagination?.['page'] || filter) {
+        filterData.push({ filter: filter || '' })
       }
 
-      return i
-    }))
+      propData.value = [].concat(props.data['data'], filterData, (data['data'] || []).map(i => {
+        i.to = {
+          name: props.data['name'],
+          params: {
+            id: i.id
+          }
+        }
 
-    if (pagination?.['prev'] || pagination?.['next']) {
-      propData.value.push({
-        total: pagination['total'] ?? null,
-        info: pagination['info'] ?? null,
-        prev: pagination['prev'] ?? null,
-        next: pagination['next'] ?? null
+        return i
+      }))
+
+      if (pagination?.['prev'] || pagination?.['next']) {
+        propData.value.push({
+          total: pagination['total'] ?? null,
+          info: pagination['info'] ?? null,
+          prev: pagination['prev'] ?? null,
+          next: pagination['next'] ?? null
+        })
+      }
+
+      nextTick(() => {
+        const input = instance.vnode.el.querySelector('input')
+        if (input) {
+          input.focus()
+        }
       })
-    }
 
-    nextTick(() => {
-      const input = instance.vnode.el.querySelector('input')
-      if (input) {
-        input.focus()
+      loading.value = false
+    }).catch(() => {
+      loading.value = false
+    })
+  },
+  onEnter () {
+    instance.parent.vnode.el.querySelectorAll(':scope > ul > li.app-menu__hover').forEach(i => {
+      if (instance.vnode.el !== i) {
+        i['classList'].remove('app-menu__hover')
+        i['querySelectorAll']('li.app-menu__hover').forEach(j => j.classList.remove('app-menu__hover'))
       }
     })
 
-    loading.value = false
-  }).catch(() => {
-    loading.value = false
-  })
-}
-
-function onEnter () {
-  instance.parent.vnode.el.querySelectorAll(':scope > ul > li.app-menu__hover').forEach(i => {
-    if (instance.vnode.el !== i) {
-      i['classList'].remove('app-menu__hover')
-      i['querySelectorAll']('li.app-menu__hover').forEach(j => j.classList.remove('app-menu__hover'))
+    if (instance.vnode.el.classList.contains('app-menu__hover')) {
+      return
     }
-  })
 
-  if (instance.vnode.el.classList.contains('app-menu__hover')) {
-    return
-  }
+    if (props.data['url']) {
+      propData.value = []
+      clearTimeout(timer)
+      timer = setTimeout(() => methods.loadData(props.data['url']), 200)
+    }
 
-  if (props.data['url']) {
-    propData.value = []
-    clearTimeout(timer)
-    timer = setTimeout(() => loadData(props.data['url']), 200)
-  }
-
-  instance.vnode.el.classList.add('app-menu__hover')
-}
-
-function onOut () {
-  if (props.data['url']) {
-    clearTimeout(timer)
-  }
-}
-
-function onClick () {
-  if (props.data['icons'] && instance.root.proxy[props.data['key']] !== undefined) {
-    const key = instance.root.proxy[props.data['key']].toString()
-    let isset = false
-    for (const i in props.data['icons']) {
-      if (i === key) {
-        instance.root.proxy[props.data['key']] = props.data['icons'][i]['value']
-        isset = true
-        break
+    instance.vnode.el.classList.add('app-menu__hover')
+  },
+  onOut () {
+    if (props.data['url']) {
+      clearTimeout(timer)
+    }
+  },
+  onClick () {
+    if (props.data['icons'] && instance.root.proxy[props.data['key']] !== undefined) {
+      const key = instance.root.proxy[props.data['key']].toString()
+      let isset = false
+      for (const i in props.data['icons']) {
+        if (i === key) {
+          instance.root.proxy[props.data['key']] = props.data['icons'][i]['value']
+          isset = true
+          break
+        }
+      }
+      if (!isset) {
+        instance.root.proxy[props.data['key']] = undefined
       }
     }
-    if (!isset) {
-      instance.root.proxy[props.data['key']] = undefined
-    }
-  }
 
-  if (props.data['click'] && instance.root.proxy[props.data['click']]) {
-    return instance.root.proxy[props.data['click']]()
+    if (props.data['click'] && instance.root.proxy[props.data['click']]) {
+      return instance.root.proxy[props.data['click']]()
+    }
   }
 }
 
@@ -266,7 +265,7 @@ const node = computed(() => {
     }, [slots])
   } else if (slots.length) {
     node = h('span', {
-      onClick: () => onClick(props.data)
+      onClick: () => methods.onClick(props.data)
     }, [slots])
   }
 
@@ -275,12 +274,12 @@ const node = computed(() => {
 </script>
 
 <template>
-  <li :data-level="level" :class="classLI" @mouseenter="onEnter" @mouseleave="onOut">
+  <li :data-level="level" :class="classLI" @mouseenter="methods.onEnter" @mouseleave="methods.onOut">
 
     <component :is="node"/>
 
     <ul v-if="propData?.length">
-      <menu-item v-for="i in propData" :data="i" :level="level + 1" @loadData="loadData"/>
+      <menu-item v-for="i in propData" :data="i" :level="level + 1" @loadData="methods.loadData"/>
     </ul>
   </li>
 </template>

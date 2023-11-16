@@ -30,44 +30,43 @@ watchEffect(() => {
   }
 })
 
-function onClose () {
-  instance.root.proxy['search'] = instance.root.proxy['search'] ? 0 : 1
-}
-
-function onInput (event) {
-  data.search = event.target.value
-  clearTimeout(data.timer)
-  data.timer = setTimeout(onSearch, 500)
-}
-
-function onSearch () {
-  if (data.search === '') {
+const methods = {
+  onClose () {
+    instance.root.proxy['search'] = instance.root.proxy['search'] ? 0 : 1
+  },
+  onInput (event) {
+    data.search = event.target.value
+    clearTimeout(data.timer)
+    data.timer = setTimeout(methods.onSearch, 500)
+  },
+  onSearch () {
+    if (data.search === '') {
+      data.result = null
+    } else {
+      data.search = data.search.trim()
+      data.result = []
+      console.log(data.search)
+    }
+  },
+  onClear () {
+    data.search = ''
     data.result = null
-  } else {
-    data.search = data.search.trim()
-    data.result = []
-    console.log(data.search)
+    nextTick(() => instance.vnode.el.querySelector('.app-search__input input').focus())
   }
-}
-
-function onClear () {
-  data.search = ''
-  data.result = null
-  nextTick(() => instance.vnode.el.querySelector('.app-search__input input').focus())
 }
 </script>
 
 <template>
   <transition name="fade">
     <div v-show="instance.root.proxy['search']" class="app-search">
-      <div class="app-search__back" @click="onClose"/>
+      <div class="app-search__back" @click="methods.onClose"/>
       <div class="app-search__main">
         <div class="app-search__input">
           <input type="text" placeholder="Enter to Search, Ctr+F to show or Escape to close"
                  class="input-lg text-2xl border-0 border-b-2 rounded-none"
                  :value="data.search"
-                 @input="onInput">
-          <i v-if="data.search !== ''" class="app-search__clear fa fa-times" @click="onClear"/>
+                 @input="methods.onInput">
+          <i v-if="data.search !== ''" class="app-search__clear fa fa-times" @click="methods.onClear"/>
         </div>
         <div class="app-search__result">
           <template v-if="data.searching">
