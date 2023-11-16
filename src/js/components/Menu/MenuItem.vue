@@ -179,11 +179,13 @@ const node = computed(() => {
   }
 
   if (loading.value) {
-    slots.push(h('i', { class: 'fa fa-circle-notch fa-fw animate-spin ml-2' }))
+    slots.push(h('span', {
+      class: 'toggle'
+    }, h('i', { class: 'fa fa-circle-notch fa-fw animate-spin' })))
   } else if ((props.data['data']?.length && props.level) || props.data['url']) {
     slots.push(h('span', {
       class: 'toggle'
-    }, h('i', { class: 'fa fa-chevron-down' })))
+    }, h('i', { class: 'fa fa-chevron-down fa-fw' })))
   }
 
   if (props.data['href']) {

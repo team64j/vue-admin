@@ -1,32 +1,32 @@
 <template>
-  <div class="cms-global-tabs">
+  <div class="app-global-tabs">
 
     <div class="grow-0">
-      <div class="cms-global-tabs__tabs" ref="tabs">
-        <div class="cms-global-tabs__pane">
+      <div class="app-global-tabs__tabs" ref="tabs">
+        <div class="app-global-tabs__pane">
           <a v-for="(tab, i) in store.getters['GlobalTabs/tabs']()"
              :key="i"
              :data-to="tab.path"
-             :class="[tab.active ? 'cms-global-tabs__active' : '']"
+             :class="[tab.active ? 'app-global-tabs__active' : '']"
              :title="tab.meta.title"
              @mousedown="clickTab(tab)"
              @dblclick="dblClickTab(tab)">
-            <span v-if="tab.loading || tab.meta.icon" class="cms-global-tabs__icon">
+            <span v-if="tab.loading || tab.meta.icon" class="app-global-tabs__icon">
               <loader-icon v-if="tab.loading"/>
               <i v-else-if="tab.meta.icon" :class="tab.meta.icon"/>
             </span>
-            <span v-if="tab.meta.title" class="cms-global-tabs__title">
+            <span v-if="tab.meta.title" class="app-global-tabs__title">
               {{ tab.meta.title }}
             </span>
-            <i v-if="!tab.meta.fixed" class="fa fa-close cms-global-tabs__close" @mousedown.stop="closeTab(tab)"/>
-            <span v-if="tab['changed']" class="cms-global-tabs__change">*</span>
+            <i v-if="!tab.meta.fixed" class="fa fa-close app-global-tabs__close" @mousedown.stop="closeTab(tab)"/>
+            <span v-if="tab['changed']" class="app-global-tabs__change">*</span>
           </a>
         </div>
       </div>
     </div>
 
     <div class="grow h-0 overflow-hidden border-t">
-      <div class="cms-global-tabs__panel" ref="panel">
+      <div class="app-global-tabs__panel" ref="panel">
 
         <router-view v-slot="{ Component }">
           <keep-alive-component :include="store.getters['GlobalTabs/keys']()">
@@ -40,7 +40,7 @@
         </router-view>
 
         <div
-            class="cms-global-tabs__frames"
+            class="app-global-tabs__frames"
             v-for="{ path, matched: [{ components: { default: component }}] } in store.getters['GlobalTabs/frames']()"
             v-show="route.path === path">
           <component
@@ -164,46 +164,49 @@ export default {
 </script>
 
 <style scoped>
-.cms-global-tabs {
+.app-global-tabs {
   @apply flex flex-col grow w-full
 }
-.cms-global-tabs__tabs {
-  @apply h-9 overflow-hidden relative
+.app-global-tabs__tabs {
+  @apply h-8 overflow-hidden relative
 }
-.cms-global-tabs__pane {
+.app-global-tabs__pane {
   @apply h-16 flex flex-nowrap overflow-auto relative z-[2] py-0.5
 }
-.cms-global-tabs__pane a {
-  @apply h-8 mx-0.5 rounded inline-flex justify-between items-center relative select-none cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600 transition
+.app-global-tabs__pane a {
+  @apply h-7 mx-0.5 rounded inline-flex justify-between items-center relative select-none cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600 transition
 }
-.cms-global-tabs__pane .cms-global-tabs__active {
+.app-global-tabs__pane .app-global-tabs__active {
   @apply !bg-blue-600 !text-white
 }
-.cms-global-tabs__panel {
+.app-global-tabs__panel {
   @apply h-full overflow-auto
 }
-.cms-global-tabs__panel > div {
+.app-global-tabs__panel > div {
   @apply h-full relative
 }
-.cms-global-tabs__panel > div > iframe {
+.app-global-tabs__panel > div > iframe {
   @apply absolute left-0 top-0 right-0 bottom-0 w-full min-h-full overflow-auto border-none
 }
-.cms-global-tabs__icon {
+.app-global-tabs__icon {
   @apply grow-0 shrink-0 w-10 inline-flex items-center justify-center pointer-events-none
 }
-.cms-global-tabs__title {
+.app-global-tabs__title {
   @apply grow pl-3 w-32 pointer-events-none truncate
 }
-.cms-global-tabs__icon + .cms-global-tabs__title {
+.app-global-tabs__icon + .app-global-tabs__title {
   @apply pl-0
 }
-.cms-global-tabs__close {
-  @apply inline-flex items-center px-2 h-full hover:text-red-500
+.app-global-tabs__close {
+  @apply inline-flex items-center px-2 h-full hover:text-red-500 opacity-0
 }
-.cms-global-tabs__change {
+.app-global-tabs__pane .app-global-tabs__active .app-global-tabs__close, .app-global-tabs__pane a:hover .app-global-tabs__close {
+  @apply opacity-100
+}
+.app-global-tabs__change {
   @apply absolute top-0 left-0 px-1 text-yellow-500 text-lg font-mono
 }
-.cms-global-tabs__frames {
+.app-global-tabs__frames {
   @apply h-full w-full relative
 }
 </style>
