@@ -165,10 +165,10 @@ const node = computed(() => {
   }
 
   // title
-  if (props.data['name']) {
+  if (props.data['title'] || props.data['name']) {
     slots.push(h('span', {
       class: 'app-menu__title',
-      innerText: props.data['name']
+      innerText: props.data['title'] || props.data['name']
     }))
   }
 

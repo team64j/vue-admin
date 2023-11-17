@@ -19,16 +19,8 @@ axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 axios.interceptors['request'].use(config => {
   config.baseURL = (store.getters['Storage/get']('hostname') || location.origin).replace(/\/$/g, '')
 
-  const token = store.getters['Storage/get']('token')
-  const lang = store.getters['Storage/get']('lang')
-
-  if (token) {
-    config.headers['Authorization'] = 'Bearer ' + token
-  }
-
-  if (lang) {
-    config.headers['Accept-Language'] = lang
-  }
+  config.headers['Authorization'] = 'Bearer ' + store.getters['Storage/get']('token', '')
+  config.headers['Accept-Language'] = store.getters['Storage/get']('lang', 'en')
 
   if (!config.url) {
     return config
@@ -39,6 +31,8 @@ axios.interceptors['request'].use(config => {
     config.baseURL = url.origin
     config.url = url.href.replace(url.origin, '')
   }
+
+  //config.headers['Referer'] = (new URL(config.baseURL)).origin + '/'
 
   const params = Object.assign(
     {},

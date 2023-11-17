@@ -1,5 +1,6 @@
 <script setup>
 import { compile, computed, getCurrentInstance, h, nextTick, onMounted, reactive } from 'vue'
+import Frame from './Layout/Frame.vue'
 
 const instance = getCurrentInstance()
 const props = defineProps(['currentRoute'])
@@ -189,6 +190,10 @@ function setLayoutData (data) {
 }
 
 function init () {
+  if (typeof $data.layout === 'string') {
+    return h(Frame, { url: $data.url, currentRoute: props.currentRoute })
+  }
+
   return h('div', {
     class: 'flex w-full h-full flex-wrap flex-col overflow-hidden'
   }, initData(null, true))
@@ -206,15 +211,29 @@ function loadData () {
   axios.get($data.url, {
     urlParams: props.currentRoute['params'],
     params: props.currentRoute['query']
-  }).then(({ data: r }) => Object.assign($data, r)).finally(() => {
+  }).then(({ data: data }) => {
+    if (typeof data === 'string') {
+      $data.layout = data
+    } else {
+      Object.assign($data, data)
+
+      emit('action', 'setTab', {
+        key: instance.vnode.key,
+        changed: false,
+        loading: false,
+        saving: false,
+        meta: { title: $data?.meta?.['title'] ?? '', icon: $data?.meta?.['icon'] ?? '' }
+      })
+    }
+  })/*.finally(() => {
     emit('action', 'setTab', {
       key: instance.vnode.key,
       changed: false,
       loading: false,
       saving: false,
-      meta: { title: $data.meta['title'] ?? '', icon: $data.meta['icon'] ?? '' }
+      meta: { title: $data?.meta?.['title'] ?? '', icon: $data?.meta?.['icon'] ?? '' }
     })
-  })
+  })*/
 }
 
 onMounted(() => {
@@ -231,5 +250,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <component v-if="$data.layout" :is="renderLayout"/>
+  <component v-if="$data.layout" :is="renderLayout" @action="action"/>
 </template>
