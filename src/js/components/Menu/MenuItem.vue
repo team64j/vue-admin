@@ -78,6 +78,9 @@ const methods = {
       loading.value = false
     })
   },
+  onClick () {
+
+  },
   onEnter () {
     instance.parent.vnode.el.querySelectorAll(':scope > ul > li.app-menu__hover').forEach(i => {
       if (instance.vnode.el !== i) {
@@ -103,7 +106,7 @@ const methods = {
       clearTimeout(timer)
     }
   },
-  onClick () {
+  onNodeClick () {
     if (props.data['icons'] && instance.root.proxy[props.data['key']] !== undefined) {
       const key = instance.root.proxy[props.data['key']].toString()
       let isset = false
@@ -265,7 +268,7 @@ const node = computed(() => {
     }, [slots])
   } else if (slots.length) {
     node = h('span', {
-      onClick: () => methods.onClick(props.data)
+      onClick: () => methods.onNodeClick(props.data)
     }, [slots])
   }
 
@@ -274,7 +277,8 @@ const node = computed(() => {
 </script>
 
 <template>
-  <li :data-level="level" :class="classLI" @mouseenter="methods.onEnter" @mouseleave="methods.onOut">
+  <li :data-level="level" :class="classLI" @click="methods.onClick" @mouseenter="methods.onEnter"
+      @mouseleave="methods.onOut">
 
     <component :is="node"/>
 
