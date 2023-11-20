@@ -8,21 +8,21 @@ const data = reactive({
   w: store.getters['Storage/get']('sidebarWidth'),
   x: 0
 })
-const elClass = computed(() => instance.proxy.$root['sidebarShow'] ? '' : '!w-0')
+const elClass = computed(() => instance.root.proxy['sidebarShow'] ? '' : '!w-0')
 
 onMounted(() => {
-  instance.proxy.$el.style.width = data.w ? data.w + 'px' : ''
+  instance.vnode.el.style.width = data.w ? data.w + 'px' : ''
 })
 
 const methods = {
   resizerDown (event) {
-    instance.proxy.$refs.resizer.classList.add('app-sidebar__resizer__active')
+    instance.refs.resizer.classList.add('app-sidebar__resizer__active')
     data.x = event.clientX
-    data.w = instance.proxy.$el.offsetWidth
+    data.w = instance.vnode.el.offsetWidth
   },
   resizerUp () {
-    instance.proxy.$refs.resizer.classList.remove('app-sidebar__resizer__active')
-    store.dispatch('Storage/set', { sidebarWidth: instance.proxy.$el.offsetWidth })
+    instance.refs.resizer.classList.remove('app-sidebar__resizer__active')
+    store.dispatch('Storage/set', { sidebarWidth: instance.vnode.el.offsetWidth })
   },
   resizerMove (event) {
     let w = data.w + (event.clientX - data.x)
@@ -31,7 +31,7 @@ const methods = {
       return
     }
 
-    instance.proxy.$el.style.width = w + 'px'
+    instance.vnode.el.style.width = w + 'px'
   }
 }
 </script>
