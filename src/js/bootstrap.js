@@ -59,7 +59,17 @@ axios.interceptors['request'].use(config => {
   return Promise.reject(error)
 })
 
-axios.interceptors['response'].use(response => response, error => {
+axios.interceptors['response'].use(response => {
+  if (typeof response.data === 'object') {
+    response.data = Object.assign({
+      data: {},
+      meta: {},
+      layout: {}
+    }, response.data)
+  }
+
+  return response
+}, error => {
   const status = error.response?.status ?? 500
 
   if (status === 401) {

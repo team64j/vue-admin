@@ -48,7 +48,7 @@ export default {
           return
         }
 
-        this.data = r.data['data'] || {}
+        this.data = r.data['meta'] || {}
 
         if (this.data.version) {
           this.connected = true

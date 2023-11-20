@@ -19,7 +19,7 @@ function login () {
 
 if (store.getters['Storage/get']('token')) {
   axios.post('bootstrap').then(r => {
-    const data = r.data?.['data'] ?? {}
+    const data = r.data?.['meta'] ?? {}
 
     if (data.routes) {
       for (const route of data.routes) {
@@ -28,7 +28,7 @@ if (store.getters['Storage/get']('token')) {
       }
 
       window.Vue = vue.createApp(App, {
-        layout: data.layout
+        layout: r.data?.['layout'] ?? {}
       })
 
       window.Vue.use(router)
