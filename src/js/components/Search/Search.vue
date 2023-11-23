@@ -70,7 +70,7 @@ const methods = {
         </div>
         <div class="app-search__result">
           <template v-if="data.searching">
-            <div class="text-center p-4"><i class="fa fa-circle-notch animate-spin"/></div>
+            <div class="text-center p-4"><loader-icon/></div>
           </template>
 
           <template v-else-if="data.result">

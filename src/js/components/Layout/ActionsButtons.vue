@@ -28,7 +28,7 @@
           <i v-if="saving"
              class="btn-sm btn-green cursor-progress absolute flex items-center justify-center left-0 top-0 h-full w-full z-10"
              @click.prevent.stop="() => false">
-            <i class="fa fa-circle-notch fa-fw animate-spin"/>
+            <loader-icon/>
           </i>
         </button>
         <button type="button" class="btn-sm btn-green rounded-l-none relative btn-toggle" @click="isToggle=!isToggle"
@@ -54,8 +54,11 @@
 </template>
 
 <script>
+import LoaderIcon from '../LoaderIcon.vue'
+
 export default {
   name: 'ActionsButtons',
+  components: { LoaderIcon },
   props: {
     actions: {
       type: Array,
