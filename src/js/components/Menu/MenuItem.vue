@@ -79,7 +79,7 @@ const methods = {
     })
   },
   onClick () {
-    if (props.data['url'] && props.level === 1 && !instance.root.proxy['menuShow']) {
+    if (props.data['url'] && !instance.root.proxy['menuShow']) {
       methods.loadData(props.data['url'])
     }
   },
@@ -95,7 +95,7 @@ const methods = {
       return
     }
 
-    if (props.data['url'] && (props.level > 1 || props.level === 1 && instance.root.proxy['menuShow'])) {
+    if (props.data['url'] && instance.root.proxy['menuShow']) {
       propData.value = []
       clearTimeout(timer)
       timer = setTimeout(() => methods.loadData(props.data['url']), 200)
@@ -216,8 +216,10 @@ const node = computed(() => {
     slots.push(h('i', {
       class: 'fa fa-chevron-left app-menu__prev',
       disabled: props.data['prev'] ? undefined : 'disabled',
-      onClick: () => {
+      onClick: (event) => {
         if (props.data['prev']) {
+          event.preventDefault()
+          event.stopPropagation()
           emit('loadData', props.data['prev'])
         }
       }
@@ -230,8 +232,10 @@ const node = computed(() => {
     slots.push(h('i', {
       class: 'fa fa-chevron-right app-menu__next',
       disabled: props.data['next'] ? undefined : 'disabled',
-      onClick: () => {
+      onClick: (event) => {
         if (props.data['next']) {
+          event.preventDefault()
+          event.stopPropagation()
           emit('loadData', props.data['next'])
         }
       }
