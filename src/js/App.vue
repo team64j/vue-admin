@@ -25,6 +25,14 @@ export default {
         return key
       }
     },
+    menuShow: {
+      set (value) {
+        store.dispatch('Storage/set', { menuShow: value })
+      },
+      get () {
+        return store.getters['Storage/get']('menuShow', false)
+      }
+    },
     sidebarShow: {
       set (value) {
         store.dispatch('Storage/set', { sidebarShow: value })

@@ -79,7 +79,9 @@ const methods = {
     })
   },
   onClick () {
-
+    if (props.data['url'] && props.level === 1 && !instance.root.proxy['menuShow']) {
+      methods.loadData(props.data['url'])
+    }
   },
   onEnter () {
     instance.parent.vnode.el.querySelectorAll(':scope > ul > li.app-menu__hover').forEach(i => {
@@ -93,7 +95,7 @@ const methods = {
       return
     }
 
-    if (props.data['url']) {
+    if (props.data['url'] && (props.level > 1 || props.level === 1 && instance.root.proxy['menuShow'])) {
       propData.value = []
       clearTimeout(timer)
       timer = setTimeout(() => methods.loadData(props.data['url']), 200)

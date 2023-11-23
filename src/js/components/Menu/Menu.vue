@@ -1,26 +1,30 @@
 <script setup>
 import MenuItem from './MenuItem.vue'
-import { getCurrentInstance } from 'vue'
+import { computed, getCurrentInstance } from 'vue'
 
 const props = defineProps(['data'])
 const instance = getCurrentInstance()
+const classMenu = computed(() => {
+
+})
 
 document.addEventListener('click', event => {
   const target = event.target.closest('li')
   if (target && target.closest('.app-menu')) {
     if (target.classList.contains('app-menu__parent') || event.target.closest('a')) {
-      instance.proxy.$el.classList.toggle('app-menu__active')
+      instance.root.proxy['menuShow'] = !instance.root.proxy['menuShow']
     }
   } else if (target?.firstElementChild.classList.contains('app-menu__pagination') ||
       target?.firstElementChild.classList.contains('app-menu__filter')) {
+    //
   } else {
-    instance.proxy.$el.classList.contains('app-menu__active') && instance.proxy.$el.classList.remove('app-menu__active')
+    instance.root.proxy['menuShow'] = false
   }
 })
 </script>
 
 <template>
-  <div class="app-menu">
+  <div class="app-menu" :class="{ 'app-menu__active' : instance.root.proxy['menuShow']}">
     <ul>
       <component :is="MenuItem" v-for="i in props.data" :data="i"/>
     </ul>
