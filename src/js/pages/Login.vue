@@ -86,6 +86,16 @@ export default {
       this.showHostnames()
       this.checkServer()
     },
+    removeHostname (hostname) {
+      if (hostname === this.hostname) {
+        this.hostname = ''
+        store.dispatch('Storage/set', { hostname: this.hostname })
+      }
+      this.hostnames = this.hostnames.filter(i => i !== hostname)
+      store.dispatch('Storage/set', { hostnames: this.hostnames })
+      this.showHostnames()
+      this.checkServer()
+    },
     login () {
       this.errors = {}
       this.isLogin = true
@@ -218,11 +228,12 @@ export default {
         <i class="fa fa-close text-rose-600 absolute top-3 right-3 cursor-pointer" @click="showHostnames"/>
 
         <div v-for="i in this.hostnames"
-             class="px-4 py-1 hover:bg-blue-600 hover:text-white rounded cursor-pointer transition"
+             class="flex items-center px-4 py-1 hover:bg-blue-600 hover:text-white rounded cursor-pointer transition"
              :class="[hostname === i ? 'bg-white/10 font-bold' : '']"
              @click="selectHostname(i)">
           <i class="fa fa-fw" :class="[hostname === i ? 'fa-check' : '']"/>
-          {{ i }}
+          <span class="grow">{{ i }}</span>
+          <i class="fa fa-times-circle fa-fw opacity-25 hover:opacity-80 transition" @click.stop="removeHostname(i)"/>
         </div>
       </div>
 
