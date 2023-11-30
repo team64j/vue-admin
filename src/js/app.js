@@ -6,7 +6,7 @@ import router from './router'
 import store from './store'
 import App from './App.vue'
 import Component from './components/Component.vue'
-import IconLoader from './components/IconLoader.vue'
+import IconLoader from './components/Layout/IconLoader.vue'
 
 window.vue = vue
 
@@ -35,17 +35,26 @@ if (store.getters['Storage/get']('token')) {
       window.Vue.use(store)
 
       const components = import.meta.glob('./components/*/*.vue', { eager: true })
+      const loadedComponents = []
 
       Object.entries(components).forEach(([path, { default: module }]) => {
         const name = path.replace(/\.\/components\/(.*?)\/\w+\.vue/, '$1')
         const moduleName = module.name ?? module.__name
+        let componentName = ``
 
         if (moduleName === name) {
-          window.Vue.component(moduleName, module)
+          componentName = `Evo` + name
         } else if (moduleName && !~moduleName.indexOf(name)) {
-          window.Vue.component(name + moduleName, module)
+          componentName = `Evo` + name + moduleName
+        }
+
+        if (componentName) {
+          window.Vue.component(componentName, module)
+          loadedComponents.push(componentName)
         }
       })
+
+      console.log(loadedComponents)
 
       window.Vue.component('IconLoader', IconLoader)
 
