@@ -1,6 +1,5 @@
 <script setup>
 import { computed, getCurrentInstance, h, nextTick, ref } from 'vue'
-import { RouterLink } from 'vue-router'
 
 const props = defineProps({
   data: {
@@ -206,7 +205,7 @@ const node = computed(() => {
       target: '_blank'
     }, [slots])
   } else if (props.data['to']) {
-    node = h(RouterLink, {
+    node = h(instance.appContext.components['RouterLink'], {
       to: props.data['to']
     }, () => slots)
   } else if (props.data['prev'] || props.data['next']) {
