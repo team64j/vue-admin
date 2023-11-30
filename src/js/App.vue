@@ -4,6 +4,7 @@ import MenuComponent from './components/Menu/Menu.vue'
 import GlobalTabs from './components/GlobalTabs.vue'
 import Sidebar from './components/Sidebar/Sidebar.vue'
 import store from './store'
+import router from './router'
 
 export default {
   name: 'App',
@@ -49,6 +50,22 @@ export default {
         return store.getters['Storage/get']('searchShow', 0)
       }
     },
+  },
+  methods: {
+    action () {
+      if (typeof this[arguments[0]] === 'function') {
+        this[arguments[0]](...Array.from(arguments).splice(1))
+      } else {
+        this.$emit('action', ...arguments)
+      }
+    },
+    pushRouter (route, callback) {
+      if (typeof route === 'string') {
+        route = router.resolve(route)
+      }
+
+      router.push(route).then(callback)
+    }
   }
 }
 </script>
@@ -56,10 +73,10 @@ export default {
 <template>
   <div class="w-full h-full flex flex-col">
     <search-component ref="search"/>
-    <menu-component ref="menu" :data="layout['menu']" class="grow-0 relative z-20"/>
-    <div class="grow-1 flex flex-row h-full overflow-hidden relative z-10">
-      <sidebar ref="sidebar" :data="layout['sidebar']" class="grow-0 shrink-0 w-72 flex flex-col"/>
-      <global-tabs class="flex grow basis-0 overflow-hidden"/>
+    <menu-component ref="menu" :data="layout['menu']" class="grow-0 relative" @action="action"/>
+    <div class="grow-1 flex flex-row h-full overflow-hidden relative">
+      <sidebar ref="sidebar" :data="layout['sidebar']" class="grow-0 shrink-0 w-72 flex flex-col" @action="action"/>
+      <global-tabs class="flex grow basis-0 overflow-hidden" @action="action"/>
     </div>
   </div>
 </template>

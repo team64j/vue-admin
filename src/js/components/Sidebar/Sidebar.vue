@@ -1,20 +1,29 @@
 <script setup>
-import { computed, getCurrentInstance, onMounted, reactive } from 'vue'
+import { computed, defineAsyncComponent, getCurrentInstance, h, onMounted, reactive } from 'vue'
 import store from '../../store'
 
 const instance = getCurrentInstance()
 const $props = defineProps(['data'])
+const $emit = defineEmits(['action'])
 const $data = reactive({
   w: store.getters['Storage/get']('sidebarWidth'),
   x: 0
 })
 const elClass = computed(() => instance.root.proxy['sidebarShow'] ? '' : '!w-0')
+const comp = defineAsyncComponent(() => import('../Component.vue'))
 
 onMounted(() => {
   instance.vnode.el.style.width = $data.w ? $data.w + 'px' : ''
 })
 
 const methods = {
+  action () {
+    if (typeof instance[arguments[0]] === 'function') {
+      instance[arguments[0]](...Array.from(arguments).splice(1))
+    } else {
+      $emit('action', ...arguments)
+    }
+  },
   resizerDown (event) {
     instance.refs.resizer.classList.add('app-sidebar__resizer__active')
     $data.x = event.clientX
@@ -39,7 +48,7 @@ const methods = {
 <template>
   <div class="app-sidebar" :class="elClass">
     <div class="app-sidebar__body">
-      Sidebar
+      <component :is="comp" :layout="$props['data']" :currentRoute="$route" class="w-full" @action="methods.action"/>
     </div>
     <div class="app-sidebar__resizer" ref="resizer" @mousedown="methods.resizerDown">
       <div class="app-sidebar__resizer__bg"/>

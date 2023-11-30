@@ -17,6 +17,43 @@ function login () {
   })
 }
 
+function assets (assets) {
+  if (assets.length) {
+    assets.forEach(i => {
+      switch (i.rel) {
+        case 'plugin':
+          import(/* @vite-ignore */i.src).then(j => {
+            Vue.use(j.default)
+          })
+          break
+
+        case 'component':
+          import(/* @vite-ignore */i.src).then(j => {
+            Vue.component(j.default.name, j.default)
+          })
+          break
+
+        case 'manifest':
+          const fragment = document.createRange().createContextualFragment(i.source)
+          document.head.appendChild(fragment)
+          break
+
+        case 'module':
+          const script = document.createElement('script')
+          script.setAttribute('src', i.src)
+          script.setAttribute('type', 'module')
+          script.setAttribute('crossorigin', 'anonymous')
+          document.head.appendChild(script)
+          break
+
+        case 'css':
+          document.head.innerHTML += `<link rel="stylesheet" href="${i.src}">`
+          break
+      }
+    })
+  }
+}
+
 if (store.getters['Storage/get']('token')) {
   axios.post('bootstrap').then(r => {
     const data = r.data?.['meta'] ?? {}
@@ -34,12 +71,14 @@ if (store.getters['Storage/get']('token')) {
       window.Vue.use(router)
       window.Vue.use(store)
 
+      data.assets && assets(data.assets)
+
       const components = import.meta.glob('./components/*/*.vue', { eager: true })
       const loadedComponents = []
 
       Object.entries(components).forEach(([path, { default: module }]) => {
         const name = path.replace(/\.\/components\/(.*?)\/\w+\.vue/, '$1')
-        const moduleName = module.name ?? module.__name
+        const moduleName = module.name ?? module.__name ?? path.replace(/\.\/components\/.*?\/(\w+)\.vue/, '$1')
         let componentName = ``
 
         if (moduleName === name) {
@@ -57,6 +96,8 @@ if (store.getters['Storage/get']('token')) {
       console.log(loadedComponents)
 
       window.Vue.component('IconLoader', IconLoader)
+
+      store.dispatch('Storage/set', { config: data['config'] || {} })
 
       window.Vue.mount('#app')
     } else {

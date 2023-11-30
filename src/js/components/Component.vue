@@ -3,13 +3,13 @@ import { compile, computed, getCurrentInstance, h, nextTick, onMounted, reactive
 import Frame from './Layout/Frame.vue'
 
 const instance = getCurrentInstance()
-const $props = defineProps(['currentRoute'])
+const $props = defineProps(['layout', 'currentRoute'])
 const $emit = defineEmits(['action', 'update:modelValue'])
 const $data = reactive({
   url: $props.currentRoute?.['meta']?.['url'] ? $props.currentRoute['meta']['url'] : $props.currentRoute['path'],
   data: null,
   meta: null,
-  layout: null,
+  layout: $props['layout'],
   errors: null
 })
 
@@ -195,7 +195,7 @@ function init () {
   }
 
   return h('div', {
-    class: 'flex w-full h-full flex-wrap flex-col overflow-hidden'
+    //class: 'flex w-full h-full flex-wrap flex-col overflow-hidden'
   }, initData(null, true))
 }
 
@@ -242,7 +242,9 @@ function loadData () {
   })
 }
 
-onMounted(loadData)
+if (!$data.layout) {
+  onMounted(loadData)
+}
 </script>
 
 <template>

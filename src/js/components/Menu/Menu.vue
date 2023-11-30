@@ -29,6 +29,9 @@ document.addEventListener('click', event => {
 </template>
 
 <style>
+.app-menu.app-menu__active {
+  @apply z-50
+}
 .app-menu > ul {
   @apply justify-between px-1 border-b select-none
 }
