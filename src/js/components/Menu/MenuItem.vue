@@ -204,11 +204,13 @@ const node = computed(() => {
   if ($props.data['href']) {
     node = h('a', {
       href: $props.data['href'],
-      target: '_blank'
+      target: '_blank',
+      class: $props.data['class']
     }, [slots])
   } else if ($props.data['to']) {
     node = h(instance.appContext.components['RouterLink'], {
-      to: $props.data['to']
+      to: $props.data['to'],
+      class: $props.data['class']
     }, () => slots)
   } else if ($props.data['prev'] || $props.data['next']) {
     slots = []
@@ -243,7 +245,7 @@ const node = computed(() => {
     }))
 
     node = h('div', {
-      class: 'app-menu__pagination'
+      class: ($props.data['class'] || '') + ' app-menu__pagination'
     }, [slots])
   } else if ($props.data['filter'] !== undefined) {
     slots = []
@@ -271,10 +273,11 @@ const node = computed(() => {
     }
 
     node = h('div', {
-      class: 'app-menu__filter'
+      class: ($props.data['class'] || '') + ' app-menu__filter'
     }, [slots])
   } else if (slots.length) {
     node = h('span', {
+      class: $props.data['class'],
       onClick: () => $methods.onNodeClick($props.data)
     }, [slots])
   }

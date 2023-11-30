@@ -18,7 +18,7 @@ function login () {
 }
 
 if (store.getters['Storage/get']('token')) {
-  axios.get('bootstrap').then(r => {
+  axios.post('bootstrap').then(r => {
     const data = r.data?.['meta'] ?? {}
 
     if (data.routes) {

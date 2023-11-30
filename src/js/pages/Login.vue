@@ -42,7 +42,7 @@ export default {
 
       store.dispatch('Storage/set', { hostname: this.hostname.replace(/\/$/g, '') })
 
-      axios.post('bootstrap').then(r => {
+      axios.get('bootstrap').then(r => {
         if (typeof r.data === 'string') {
           this.errors['hostname'] = true
           return
@@ -55,7 +55,7 @@ export default {
         }
 
         if (this.data.languages?.length) {
-          this.lang = this.data.languages[store.getters['Storage/get']('lang') || 'en'] ?? {}
+          this.lang = this.data.languages.filter(i => i.key === (store.getters['Storage/get']('lang') || 'en'))[0] ?? {}
         }
 
         if (!this.hostnames.some(i => i === this.hostname)) {
@@ -100,7 +100,7 @@ export default {
       this.errors = {}
       this.isLogin = true
 
-      axios.post('/auth/login', this.form).then(r => {
+      axios.post('/auth', this.form).then(r => {
         const data = r.data['data']
 
         if (data['access_token']) {
