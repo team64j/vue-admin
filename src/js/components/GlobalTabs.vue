@@ -12,7 +12,7 @@
              @mousedown="clickTab(tab)"
              @dblclick="dblClickTab(tab)">
             <span v-if="tab.loading || tab.meta.icon" class="app-global-tabs__icon">
-              <loader-icon v-if="tab.loading"/>
+              <icon-loader v-if="tab.loading"/>
               <i v-else-if="tab.meta.icon" :class="tab.meta.icon"/>
             </span>
             <span v-if="tab.meta.title" class="app-global-tabs__title">

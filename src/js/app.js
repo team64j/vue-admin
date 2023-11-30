@@ -6,7 +6,7 @@ import router from './router'
 import store from './store'
 import App from './App.vue'
 import Component from './components/Component.vue'
-import LoaderIcon from './components/LoaderIcon.vue'
+import IconLoader from './components/IconLoader.vue'
 
 window.vue = vue
 
@@ -47,7 +47,7 @@ if (store.getters['Storage/get']('token')) {
         }
       })
 
-      window.Vue.component('LoaderIcon', LoaderIcon)
+      window.Vue.component('IconLoader', IconLoader)
 
       window.Vue.mount('#app')
     } else {

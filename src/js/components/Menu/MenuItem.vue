@@ -1,7 +1,6 @@
 <script setup>
 import { computed, getCurrentInstance, h, nextTick, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import LoaderIcon from '../LoaderIcon.vue'
 
 const props = defineProps({
   data: {
@@ -194,7 +193,7 @@ const node = computed(() => {
   if (loading.value) {
     slots.push(h('span', {
       class: 'app-menu__toggle'
-    }, h(LoaderIcon)))
+    }, h(instance.appContext.components['IconLoader'])))
   } else if ((props.data['data']?.length && props.level) || props.data['url']) {
     slots.push(h('span', {
       class: 'app-menu__toggle'
