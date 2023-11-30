@@ -3,10 +3,10 @@ import { compile, computed, getCurrentInstance, h, nextTick, onMounted, reactive
 import Frame from './Layout/Frame.vue'
 
 const instance = getCurrentInstance()
-const props = defineProps(['currentRoute'])
-const emit = defineEmits(['action', 'update:modelValue'])
+const $props = defineProps(['currentRoute'])
+const $emit = defineEmits(['action', 'update:modelValue'])
 const $data = reactive({
-  url: props.currentRoute?.['meta']?.['url'] ? props.currentRoute['meta']['url'] : props.currentRoute['path'],
+  url: $props.currentRoute?.['meta']?.['url'] ? $props.currentRoute['meta']['url'] : $props.currentRoute['path'],
   data: null,
   meta: null,
   layout: null,
@@ -35,11 +35,11 @@ function updateModelValue (value, instance) {
     }
   }
 
-  emit('update:modelValue', ...arguments)
+  $emit('update:modelValue', ...arguments)
 }
 
 function action () {
-  emit('action', ...arguments)
+  $emit('action', ...arguments)
 }
 
 function setValue (key, value) {
@@ -191,7 +191,7 @@ function setLayoutData (data) {
 
 function init () {
   if (typeof $data.layout === 'string') {
-    return h(Frame, { url: $data.url, currentRoute: props.currentRoute })
+    return h(Frame, { url: $data.url, currentRoute: $props.currentRoute })
   }
 
   return h('div', {
@@ -200,53 +200,49 @@ function init () {
 }
 
 function loadData () {
+  $emit('action', 'setTab', {
+    key: instance.vnode.key,
+    changed: false,
+    loading: true,
+    saving: false,
+    meta: { title: $props.currentRoute?.['meta']?.title !== undefined ? $props.currentRoute['meta'].title : '...' }
+  })
+
   $data.data = null
   $data.meta = null
   $data.errors = null
 
-  if (!props.currentRoute['meta']['group']) {
+  if (!$props.currentRoute['meta']['group']) {
     $data.layout = null
   }
 
   axios.get($data.url, {
-    urlParams: props.currentRoute['params'],
-    params: props.currentRoute['query']
+    urlParams: $props.currentRoute['params'],
+    params: $props.currentRoute['query']
   }).then(({ data: data }) => {
     if (typeof data === 'string') {
       $data.layout = data
     } else {
       Object.assign($data, data)
 
-      emit('action', 'setTab', {
-        key: instance.vnode.key,
-        changed: false,
-        loading: false,
-        saving: false,
-        meta: { title: $data?.meta?.['title'] ?? '', icon: $data?.meta?.['icon'] ?? '' }
-      })
+      if ($data?.meta?.['title'] !== undefined || $data?.meta?.['icon'] !== undefined) {
+        $emit('action', 'setTab', {
+          key: instance.vnode.key,
+          meta: { title: $data.meta['title'] ?? '', icon: $data.meta['icon'] ?? '' }
+        })
+      }
     }
-  })/*.finally(() => {
-    emit('action', 'setTab', {
+  }).finally(() => {
+    $emit('action', 'setTab', {
       key: instance.vnode.key,
       changed: false,
       loading: false,
-      saving: false,
-      meta: { title: $data?.meta?.['title'] ?? '', icon: $data?.meta?.['icon'] ?? '' }
+      saving: false
     })
-  })*/
+  })
 }
 
-onMounted(() => {
-  emit('action', 'setTab', {
-    key: instance.vnode.key,
-    changed: false,
-    loading: true,
-    saving: false,
-    meta: { title: props.currentRoute?.['meta']?.title !== undefined ? props.currentRoute['meta'].title : '...' }
-  })
-
-  loadData()
-})
+onMounted(loadData)
 </script>
 
 <template>
