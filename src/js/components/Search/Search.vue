@@ -3,7 +3,7 @@ import { getCurrentInstance, nextTick, onMounted, reactive, watchEffect } from '
 
 const instance = getCurrentInstance()
 
-const data = reactive({
+const $data = reactive({
   search: '',
   result: null,
   timer: 0,
@@ -13,44 +13,44 @@ const data = reactive({
 onMounted(() => {
   document.addEventListener('keydown', (event) => {
     if (event.ctrlKey && event.code === 'KeyF') {
-      instance.root.proxy['search'] = 1
+      instance.root.proxy['searchShow'] = 1
       event.preventDefault()
     }
 
-    if (event.code === 'Escape' && instance.root.proxy['search']) {
-      instance.root.proxy['search'] = 0
+    if (event.code === 'Escape' && instance.root.proxy['searchShow']) {
+      instance.root.proxy['searchShow'] = 0
       event.preventDefault()
     }
   })
 })
 
 watchEffect(() => {
-  if (instance.root.proxy['search']) {
+  if (instance.root.proxy['searchShow']) {
     nextTick(() => instance.vnode.el.querySelector('.app-search__input input').focus())
   }
 })
 
 const methods = {
   onClose () {
-    instance.root.proxy['search'] = instance.root.proxy['search'] ? 0 : 1
+    instance.root.proxy['searchShow'] = instance.root.proxy['searchShow'] ? 0 : 1
   },
   onInput (event) {
-    data.search = event.target.value
-    clearTimeout(data.timer)
-    data.timer = setTimeout(methods.onSearch, 500)
+    $data.search = event.target.value
+    clearTimeout($data.timer)
+    $data.timer = setTimeout(methods.onSearch, 500)
   },
   onSearch () {
-    if (data.search === '') {
-      data.result = null
+    if ($data.search === '') {
+      $data.result = null
     } else {
-      data.search = data.search.trim()
-      data.result = []
-      console.log(data.search)
+      $data.search = $data.search.trim()
+      $data.result = []
+      console.log($data.search)
     }
   },
   onClear () {
-    data.search = ''
-    data.result = null
+    $data.search = ''
+    $data.result = null
     nextTick(() => instance.vnode.el.querySelector('.app-search__input input').focus())
   }
 }
@@ -58,23 +58,23 @@ const methods = {
 
 <template>
   <transition name="fade">
-    <div v-show="instance.root.proxy['search']" class="app-search">
+    <div v-show="instance.root.proxy['searchShow']" class="app-search">
       <div class="app-search__back" @click="methods.onClose"/>
       <div class="app-search__main">
         <div class="app-search__input">
           <input type="text" name="search" placeholder="Enter to Search, Ctr+F to show or Escape to close"
                  class="input-lg text-2xl border-0 border-b-2 rounded-none"
-                 :value="data.search"
+                 :value="$data.search"
                  @input="methods.onInput">
-          <i v-if="data.search !== ''" class="app-search__clear fa fa-times" @click="methods.onClear"/>
+          <i v-if="$data.search !== ''" class="app-search__clear fa fa-times" @click="methods.onClear"/>
         </div>
         <div class="app-search__result">
-          <template v-if="data.searching">
+          <template v-if="$data.searching">
             <div class="text-center p-4"><icon-loader/></div>
           </template>
 
-          <template v-else-if="data.result">
-            <div v-if="data.result.length" v-for="i in data.result">
+          <template v-else-if="$data.result">
+            <div v-if="$data.result.length" v-for="i in $data.result">
               {{ i }}
             </div>
             <div v-else class="text-center p-4">Not Found</div>

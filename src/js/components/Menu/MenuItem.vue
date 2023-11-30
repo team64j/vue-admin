@@ -1,7 +1,9 @@
 <script setup>
-import { computed, getCurrentInstance, h, nextTick, ref } from 'vue'
+import { computed, getCurrentInstance, h, nextTick, reactive } from 'vue'
 
-const props = defineProps({
+const instance = getCurrentInstance()
+
+const $props = defineProps({
   data: {
     type: Object,
     default: {}
@@ -12,27 +14,27 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['loadData'])
+const $emit = defineEmits(['loadData'])
 
-const instance = getCurrentInstance()
+const $data = reactive({
+  timer: 0,
+  filter: '',
+  loading: false,
+  data: $props.data?.['url'] ? [] : ($props.data?.['data'] || [])
+})
 
-let timer = 0
-let filter
-let loading = ref(false)
-let propData = ref(props.data?.['url'] ? [] : (props.data?.['data'] || []))
-
-const methods = {
+const $methods = {
   loadData (url, params = {}, f) {
-    url ??= props.data['url']
-    loading.value = true
-    propData.value = []
+    url ??= $props.data['url']
+    $data.loading = true
+    $data.data = []
 
     if (f !== undefined) {
-      filter = f
+      $data.filter = f
     }
 
-    if (filter !== undefined) {
-      params.filter = filter
+    if ($data.filter !== undefined) {
+      params.filter = $data.filter
     }
 
     axios.get(url, {
@@ -41,13 +43,13 @@ const methods = {
       const filterData = []
       const pagination = data['meta']['pagination'] ?? {}
 
-      if (pagination?.['total'] > pagination?.['page'] || filter) {
-        filterData.push({ filter: filter || '' })
+      if (pagination?.['total'] > pagination?.['page'] || $data.filter) {
+        filterData.push({ filter: $data.filter || '' })
       }
 
-      propData.value = [].concat(props.data['data'], filterData, (data['data'] || []).map(i => {
+      $data.data = [].concat($props.data['data'], filterData, (data['data'] || []).map(i => {
         i.to = {
-          name: props.data['name'],
+          name: $props.data['name'],
           params: {
             id: i.id
           }
@@ -57,7 +59,7 @@ const methods = {
       }))
 
       if (pagination?.['prev'] || pagination?.['next']) {
-        propData.value.push({
+        $data.data.push({
           total: pagination['total'] ?? null,
           info: pagination['info'] ?? null,
           prev: pagination['prev'] ?? null,
@@ -72,14 +74,14 @@ const methods = {
         }
       })
 
-      loading.value = false
+      $data.loading = false
     }).catch(() => {
-      loading.value = false
+      $data.loading = false
     })
   },
   onClick () {
-    if (props.data['url'] && !instance.root.proxy['menuShow']) {
-      methods.loadData(props.data['url'])
+    if ($props.data['url'] && !instance.root.proxy['menuShow']) {
+      $methods.loadData($props.data['url'])
     }
   },
   onEnter () {
@@ -94,44 +96,44 @@ const methods = {
       return
     }
 
-    if (props.data['url'] && instance.root.proxy['menuShow']) {
-      propData.value = []
-      clearTimeout(timer)
-      timer = setTimeout(() => methods.loadData(props.data['url']), 200)
+    if ($props.data['url'] && instance.root.proxy['menuShow']) {
+      $data.data = []
+      clearTimeout($data.timer)
+      $data.timer = setTimeout(() => $methods.loadData($props.data['url']), 200)
     }
 
     instance.vnode.el.classList.add('app-menu__hover')
   },
   onOut () {
-    if (props.data['url']) {
-      clearTimeout(timer)
+    if ($props.data['url']) {
+      clearTimeout($data.timer)
     }
   },
   onNodeClick () {
-    if (props.data['icons'] && instance.root.proxy[props.data['key']] !== undefined) {
-      const key = instance.root.proxy[props.data['key']].toString()
+    if ($props.data['icons'] && instance.root.proxy[$props.data['key']] !== undefined) {
+      const key = instance.root.proxy[$props.data['key']].toString()
       let isset = false
-      for (const i in props.data['icons']) {
+      for (const i in $props.data['icons']) {
         if (i === key) {
-          instance.root.proxy[props.data['key']] = props.data['icons'][i]['value']
+          instance.root.proxy[$props.data['key']] = $props.data['icons'][i]['value']
           isset = true
           break
         }
       }
       if (!isset) {
-        instance.root.proxy[props.data['key']] = undefined
+        instance.root.proxy[$props.data['key']] = undefined
       }
     }
 
-    if (props.data['click'] && instance.root.proxy[props.data['click']]) {
-      return instance.root.proxy[props.data['click']]()
+    if ($props.data['click'] && instance.root.proxy[$props.data['click']]) {
+      return instance.root.proxy[$props.data['click']]()
     }
   }
 }
 
 const classLI = computed(() => {
   let c = ''
-  if (props.data?.['data']?.length || props.data?.['url']) {
+  if ($props.data?.['data']?.length || $props.data?.['url']) {
     c += 'app-menu__parent'
   }
 
@@ -143,17 +145,17 @@ const node = computed(() => {
   let slots = []
 
   let icon = null
-  if (props.data['icons'] && instance.root.proxy[props.data['key']] !== undefined) {
-    const key = instance.root.proxy[props.data['key']].toString()
-    for (const i in props.data['icons']) {
+  if ($props.data['icons'] && instance.root.proxy[$props.data['key']] !== undefined) {
+    const key = instance.root.proxy[$props.data['key']].toString()
+    for (const i in $props.data['icons']) {
       if (i === key) {
-        icon = props.data['icons'][i]['key']
+        icon = $props.data['icons'][i]['key']
         break
       }
     }
   }
 
-  icon = icon ?? props.data['icon'] ?? null
+  icon = icon ?? $props.data['icon'] ?? null
 
   // icon
   if (icon) {
@@ -169,73 +171,73 @@ const node = computed(() => {
   }
 
   // title
-  if (props.data['title'] || props.data['name']) {
+  if ($props.data['title'] || $props.data['name']) {
     slots.push(h('span', {
       class: 'app-menu__title',
-      innerText: props.data['title'] || props.data['name']
+      innerText: $props.data['title'] || $props.data['name']
     }))
   }
 
   // locked
-  if (props.data['locked']) {
+  if ($props.data['locked']) {
     slots.push(h('i', { class: 'app-menu__locked fa fa-lock' }))
   }
 
   // id
-  if (props.data['id'] !== undefined) {
+  if ($props.data['id'] !== undefined) {
     slots.push(h('span', {
       class: 'app-menu__id',
-      innerText: props.data['id']
+      innerText: $props.data['id']
     }))
   }
 
-  if (loading.value) {
+  if ($data.loading) {
     slots.push(h('span', {
       class: 'app-menu__toggle'
     }, h(instance.appContext.components['IconLoader'])))
-  } else if ((props.data['data']?.length && props.level) || props.data['url']) {
+  } else if (($props.data['data']?.length && $props.level) || $props.data['url']) {
     slots.push(h('span', {
       class: 'app-menu__toggle'
     }, h('i', { class: 'fa fa-chevron-down fa-fw' })))
   }
 
-  if (props.data['href']) {
+  if ($props.data['href']) {
     node = h('a', {
-      href: props.data['href'],
+      href: $props.data['href'],
       target: '_blank'
     }, [slots])
-  } else if (props.data['to']) {
+  } else if ($props.data['to']) {
     node = h(instance.appContext.components['RouterLink'], {
-      to: props.data['to']
+      to: $props.data['to']
     }, () => slots)
-  } else if (props.data['prev'] || props.data['next']) {
+  } else if ($props.data['prev'] || $props.data['next']) {
     slots = []
 
     // prev
     slots.push(h('i', {
       class: 'fa fa-chevron-left app-menu__prev',
-      disabled: props.data['prev'] ? undefined : 'disabled',
+      disabled: $props.data['prev'] ? undefined : 'disabled',
       onClick: (event) => {
-        if (props.data['prev']) {
+        if ($props.data['prev']) {
           event.preventDefault()
           event.stopPropagation()
-          emit('loadData', props.data['prev'])
+          $emit('loadData', $props.data['prev'])
         }
       }
     }))
 
     // total info
-    slots.push(h('span', props.data['info'] ?? props.data['total']))
+    slots.push(h('span', $props.data['info'] ?? $props.data['total']))
 
     // next
     slots.push(h('i', {
       class: 'fa fa-chevron-right app-menu__next',
-      disabled: props.data['next'] ? undefined : 'disabled',
+      disabled: $props.data['next'] ? undefined : 'disabled',
       onClick: (event) => {
-        if (props.data['next']) {
+        if ($props.data['next']) {
           event.preventDefault()
           event.stopPropagation()
-          emit('loadData', props.data['next'])
+          $emit('loadData', $props.data['next'])
         }
       }
     }))
@@ -243,27 +245,27 @@ const node = computed(() => {
     node = h('div', {
       class: 'app-menu__pagination'
     }, [slots])
-  } else if (props.data['filter'] !== undefined) {
+  } else if ($props.data['filter'] !== undefined) {
     slots = []
 
     slots.push(h('input', {
       type: 'text',
       name: 'filter',
-      value: props.data['filter'],
+      value: $props.data['filter'],
       placeholder: 'filter ...',
       onInput: (event) => {
-        clearTimeout(timer)
-        timer = setTimeout(() => {
-          emit('loadData', null, {}, event.target.value)
+        clearTimeout($data.timer)
+        $data.timer = setTimeout(() => {
+          $emit('loadData', null, {}, event.target.value)
         }, 500)
       }
     }))
 
-    if (props.data['filter']) {
+    if ($props.data['filter']) {
       slots.push(h('i', {
         class: 'fa fa-remove app-menu__clear',
         onClick: () => {
-          emit('loadData', null, {}, '')
+          $emit('loadData', null, {}, '')
         }
       }))
     }
@@ -273,7 +275,7 @@ const node = computed(() => {
     }, [slots])
   } else if (slots.length) {
     node = h('span', {
-      onClick: () => methods.onNodeClick(props.data)
+      onClick: () => $methods.onNodeClick($props.data)
     }, [slots])
   }
 
@@ -282,13 +284,13 @@ const node = computed(() => {
 </script>
 
 <template>
-  <li :data-level="level" :class="classLI" @click="methods.onClick" @mouseenter="methods.onEnter"
-      @mouseleave="methods.onOut">
+  <li :data-level="level" :class="classLI" @click="$methods.onClick" @mouseenter="$methods.onEnter"
+      @mouseleave="$methods.onOut">
 
     <component :is="node"/>
 
-    <ul v-if="propData?.length">
-      <menu-item v-for="i in propData" :data="i" :level="level + 1" @loadData="methods.loadData"/>
+    <ul v-if="$data.data?.length">
+      <menu-item v-for="i in $data.data" :data="i" :level="level + 1" @loadData="$methods.loadData"/>
     </ul>
   </li>
 </template>

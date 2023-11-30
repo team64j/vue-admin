@@ -41,12 +41,12 @@ export default {
         return store.getters['Storage/get']('sidebarShow', 1)
       }
     },
-    search: {
+    searchShow: {
       set (value) {
-        store.dispatch('Storage/set', { search: value })
+        store.dispatch('Storage/set', { searchShow: value })
       },
       get () {
-        return store.getters['Storage/get']('search', 0)
+        return store.getters['Storage/get']('searchShow', 0)
       }
     },
   }

@@ -31,12 +31,14 @@
             <icon-loader/>
           </i>
         </button>
-        <button type="button" class="btn-sm btn-green rounded-l-none relative btn-toggle" @click="isToggle=!isToggle"
+        <button type="button" class="btn-sm btn-green rounded-l-none relative app-actions-buttons__button-toggle"
+                @click="isToggle=!isToggle"
                 @blur="isToggle=false"
                 :disabled="saving">
-          <i class="fa-solid fa-angle-down fa-fw evo-toggle transition" :class="{ 'transform rotate-180': isToggle }"/>
+          <i class="fa-solid fa-angle-down fa-fw leading-[0] app-actions-buttons__toggle transition"
+             :class="{ 'transform rotate-180': isToggle }"/>
         </button>
-        <div v-show="isToggle" class="app-actions-buttons__save-buttons shadow">
+        <div v-show="isToggle" class="app-actions-buttons__save-buttons">
           <button v-for="ii in i.data.filter((j, kk) => kk !== stay)"
                   :title="lang[i.action] + ' + ' + ii.title"
                   @mousedown.prevent="click($event, i.action, ii.stay)"
@@ -166,18 +168,18 @@ export default {
 .app-actions-buttons > button, .app-actions-buttons > div {
   @apply inline-flex mx-0.5
 }
-.app-actions-buttons button > i.fa:not(.evo-toggle) {
+.app-actions-buttons button > i.fa:not(.app-actions-buttons__toggle) {
   @apply md:hidden
 }
 .app-actions-buttons button span {
   @apply hidden md:inline-block px-1
 }
-.app-actions-buttons button.btn-toggle::before {
+.app-actions-buttons button.app-actions-buttons__button-toggle::before {
   @apply block absolute left-[-1px] top-[10%] h-[80%] w-[1px] bg-white/20;
   content: "";
 }
 .app-actions-buttons__save-buttons {
-  @apply absolute left-0 top-full mt-0.5 w-full flex flex-col opacity-100 visible transition
+  @apply absolute left-0 top-full mt-0.5 w-full flex flex-col opacity-100 visible shadow transition
 }
 .app-actions-buttons__save-buttons button {
   @apply border-t-0 rounded-none first:rounded-t last:rounded-b

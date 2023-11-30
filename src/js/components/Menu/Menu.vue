@@ -1,12 +1,9 @@
 <script setup>
 import MenuItem from './MenuItem.vue'
-import { computed, getCurrentInstance } from 'vue'
+import { getCurrentInstance } from 'vue'
 
-const props = defineProps(['data'])
 const instance = getCurrentInstance()
-const classMenu = computed(() => {
-
-})
+const $props = defineProps(['data'])
 
 document.addEventListener('click', event => {
   const target = event.target.closest('li')
@@ -26,7 +23,7 @@ document.addEventListener('click', event => {
 <template>
   <div class="app-menu" :class="{ 'app-menu__active' : instance.root.proxy['menuShow']}">
     <ul>
-      <component :is="MenuItem" v-for="i in props.data" :data="i"/>
+      <component :is="MenuItem" v-for="i in $props.data" :data="i"/>
     </ul>
   </div>
 </template>

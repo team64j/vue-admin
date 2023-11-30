@@ -3,29 +3,29 @@ import { computed, getCurrentInstance, onMounted, reactive } from 'vue'
 import store from '../../store'
 
 const instance = getCurrentInstance()
-const props = defineProps(['data'])
-const data = reactive({
+const $props = defineProps(['data'])
+const $data = reactive({
   w: store.getters['Storage/get']('sidebarWidth'),
   x: 0
 })
 const elClass = computed(() => instance.root.proxy['sidebarShow'] ? '' : '!w-0')
 
 onMounted(() => {
-  instance.vnode.el.style.width = data.w ? data.w + 'px' : ''
+  instance.vnode.el.style.width = $data.w ? $data.w + 'px' : ''
 })
 
 const methods = {
   resizerDown (event) {
     instance.refs.resizer.classList.add('app-sidebar__resizer__active')
-    data.x = event.clientX
-    data.w = instance.vnode.el.offsetWidth
+    $data.x = event.clientX
+    $data.w = instance.vnode.el.offsetWidth
   },
   resizerUp () {
     instance.refs.resizer.classList.remove('app-sidebar__resizer__active')
     store.dispatch('Storage/set', { sidebarWidth: instance.vnode.el.offsetWidth })
   },
   resizerMove (event) {
-    let w = data.w + (event.clientX - data.x)
+    let w = $data.w + (event.clientX - $data.x)
 
     if (w > window.innerWidth / 2 || w < 50) {
       return
