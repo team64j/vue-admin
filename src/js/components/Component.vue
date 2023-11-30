@@ -150,7 +150,7 @@ function createComponent (data, setAction) {
   }
 
   if (component.props?.['currentRoute'] || component?.extends?.props?.['currentRoute']) {
-    attrs.currentRoute = $data['currentRoute']
+    attrs.currentRoute = $props['currentRoute']
   }
 
   if (setAction || component.props?.['modelValue'] || component?.extends?.props?.['modelValue']) {
