@@ -78,7 +78,7 @@
               <panel-cell
                   :columns="propColumns"
                   :category="propData.data"
-                  :data="$parent.$parent.$parent['data']"
+                  :data="$parent['data']"
                   :item="item"
                   @action="action"
                   @update:modelValue="updateModelValue"/>
@@ -96,7 +96,7 @@
               <tr :class="{ 'disabled' : item.disabled }">
                 <panel-cell :columns="propColumns"
                             :category="propData"
-                            :data="$parent.$parent.$parent['data']"
+                            :data="$parent['data']"
                             :item="item"
                             @action="action"
                             @update:modelValue="updateModelValue"/>
@@ -111,7 +111,7 @@
             <panel-cell
                 :columns="propColumns"
                 :category="propData"
-                :data="$parent.$parent.$parent['data']"
+                :data="$parent['data']"
                 :item="item"
                 @action="action"
                 @update:modelValue="updateModelValue"/>
@@ -144,7 +144,7 @@
                   <panel-cell
                       :columns="propColumns"
                       :category="category"
-                      :data="$parent.$parent.$parent['data']"
+                      :data="$parent['data']"
                       :item="item"
                       @action="action"
                       @update:modelValue="updateModelValue"/>
@@ -164,7 +164,7 @@
                     <panel-cell
                         :columns="propColumns"
                         :category="category"
-                        :data="$parent.$parent.$parent['data']"
+                        :data="$parent['data']"
                         :item="item"
                         @action="action"
                         @update:modelValue="updateModelValue"/>
@@ -179,7 +179,7 @@
                 <panel-cell
                     :columns="propColumns"
                     :category="category"
-                    :data="$parent.$parent.$parent['data']"
+                    :data="$parent['data']"
                     :item="item"
                     @action="action"
                     @update:modelValue="updateModelValue"/>
