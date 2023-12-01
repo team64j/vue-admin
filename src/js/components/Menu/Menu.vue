@@ -30,7 +30,7 @@ document.addEventListener('click', event => {
 
 <style>
 .app-menu.app-menu__active {
-  @apply z-50
+  @apply z-10
 }
 .app-menu > ul {
   @apply justify-between px-1 border-b select-none
@@ -63,7 +63,7 @@ document.addEventListener('click', event => {
   @apply -my-1 -mx-1.5 min-w-[2rem] max-w-none max-h-none h-8 w-auto block relative
 }
 .app-menu li .app-menu__title {
-  @apply grow
+  @apply grow truncate
 }
 .app-menu > ul > li > ul > li > a .app-menu__title, .app-menu > ul > li > ul > li > span .app-menu__title {
   @apply hidden md:inline-block
@@ -81,7 +81,7 @@ document.addEventListener('click', event => {
   @apply ml-2 -mr-1 inline-flex items-center justify-center h-full opacity-70
 }
 .app-menu li .app-menu__toggle i {
-  @apply text-sm pointer-events-none transition
+  @apply leading-[0] pointer-events-none transition
 }
 .app-menu.app-menu__active > ul > li > ul > li.app-menu__hover > * > .app-menu__toggle i {
   @apply rotate-180
@@ -117,7 +117,7 @@ document.addEventListener('click', event => {
   @apply mt-1
 }
 .app-menu > ul > li > ul li.app-menu__parent > ul {
-  @apply absolute opacity-0 invisible top-full left-0 flex-col min-w-full md:min-w-[18rem] rounded py-1 shadow-2xl bg-white dark:bg-gray-700 transition;
+  @apply absolute opacity-0 invisible top-full left-0 flex-col min-w-full md:w-80 rounded py-1 shadow-2xl bg-white dark:bg-gray-700 transition;
   max-height: calc(100vh - 3.5rem);
 }
 .app-menu > ul > li:last-of-type li.app-menu__parent > ul {

@@ -1,5 +1,5 @@
 <template>
-  <div class="evo-tree__menu">
+  <div class="app-tree__menu">
     <div class="flex items-center grow">
       <template v-for="a in actions.filter(i => i.position === 'left' || !i.position)">
         <tree-menu-item

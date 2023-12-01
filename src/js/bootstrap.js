@@ -97,7 +97,8 @@ axios.interceptors['response'].use(response => {
 
     if (!status) {
       store.dispatch('Storage/del', 'token')
-      return router.push({ name: 'Login' })
+      location.reload()
+      //return router.push({ name: 'Login' })
     }
   }
 

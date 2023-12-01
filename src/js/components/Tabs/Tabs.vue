@@ -1,20 +1,20 @@
 <template>
-  <div :id="id+`Pane`" class="evo-tab-pane" :class="{ 'evo-tab-pane-vertical': vertical }">
+  <div :id="id+`Pane`" class="app-tabs" :class="{ 'app-tabs__vertical': vertical }">
 
-    <div v-if="data.length > 1" class="evo-tab-row-container"
-         :class="[navigation ? 'evo-tab-row-with-navigation' : '', smallTabs ? 'evo-tab-pane-small-tabs' : '']">
+    <div v-if="data.length > 1" class="app-tabs__row__container"
+         :class="[navigation ? 'app-tabs__row__with_navigation' : '', smallTabs ? 'app-tabs__small' : '']">
 
-      <div class="evo-tab-row" ref="row">
-        <div v-for="(tab, index) in data" :key="index" :title="tab.title" class="evo-tab" :class="{ 'active' : tab.id === active }"
+      <div class="app-tabs__row" ref="row">
+        <div v-for="(tab, index) in data" :key="index" :title="tab.title" class="app-tabs__tab" :class="{ 'app-tabs__tab-active' : tab.id === active }"
              @mousedown="select(tab, index)">
-          <i v-if="tab.icon" class="evo-icon" :class="tab.icon"/>
+          <i v-if="tab.icon" class="app-tabs__tab-icon" :class="tab.icon"/>
           <span v-if="tab.name">{{ tab.name }}</span>
         </div>
       </div>
 
       <template v-if="navigation">
-        <i class="fa fa-angle-left evo-prev disabled" @mousedown="prev" ref="prev"></i>
-        <i class="fa fa-angle-right evo-next disabled" @mousedown="next" ref="next"></i>
+        <i class="fa fa-angle-left app-tabs__prev disabled" @mousedown="prev" ref="prev"></i>
+        <i class="fa fa-angle-right app-tabs__next disabled" @mousedown="next" ref="next"></i>
       </template>
     </div>
 
@@ -23,7 +23,7 @@
         <div v-show="tab.id === active"
              :id="`tab-`+tab.id"
              :class="tab.class"
-             class="evo-tab-page">
+             class="app-tabs__page">
           <slot v-if="$slots[tab.id]" :name="tab.id"/>
           <div v-else class="text-center p-5 w-full">
             <evo-layout-loader-icon/>
@@ -38,7 +38,7 @@
           <div v-if="tab.id === active"
                :id="`tab-`+tab.id"
                :class="tab.class"
-               class="evo-tab-page">
+               class="app-tabs__page">
             <slot v-if="$slots[tab.id]" :name="tab.id"/>
             <div v-else class="text-center p-5 w-full">
               <evo-layout-loader-icon/>
@@ -49,7 +49,7 @@
           <div v-if="tab.loaded || tab.id === active" v-show="tab.id === active"
                :id="`tab-`+tab.id"
                :class="tab.class"
-               class="evo-tab-page">
+               class="app-tabs__page">
             <slot v-if="$slots[tab.id]" :name="tab.id"/>
             <div v-else class="text-center p-5 w-full">
               <evo-layout-loader-icon/>
@@ -65,7 +65,7 @@
           <div v-if="tab.id === active"
                :id="`tab-`+tab.id"
                :class="tab.class"
-               class="evo-tab-page">
+               class="app-tabs__page">
             <slot v-if="$slots[tab.id]" :name="tab.id"/>
             <div v-else class="text-center p-5 w-full">
               <evo-layout-loader-icon/>
@@ -76,7 +76,7 @@
           <div v-show="tab.id === active"
                :id="`tab-`+tab.id"
                :class="tab.class"
-               class="evo-tab-page">
+               class="app-tabs__page">
             <slot v-if="$slots[tab.id]" :name="tab.id"/>
             <div v-else class="text-center p-5 w-full">
               <evo-layout-loader-icon/>
@@ -236,7 +236,7 @@ export default {
       if (this.$refs.row) {
         this.$refs.row.styles = getComputedStyle(this.$refs.row)
 
-        this.$refs.row.querySelectorAll('.evo-tab').forEach((t, i) => {
+        this.$refs.row.querySelectorAll('.app-tabs__tab').forEach((t, i) => {
           t.styles = getComputedStyle(t)
 
           if (i <= index) {
@@ -294,110 +294,110 @@ export default {
 </script>
 
 <style scoped>
-.evo-tab-row-container {
+.app-tabs__row__container {
   @apply overflow-hidden relative h-12 w-full
 }
-.evo-tab-row {
-  @apply relative z-20 overflow-hidden overflow-x-auto h-20 px-0 mx-0 pt-1 flex flex-nowrap
+.app-tabs__row {
+  @apply relative overflow-hidden overflow-x-auto h-20 px-0 mx-0 pt-1 flex flex-nowrap
 }
-.evo-tab-row-container.evo-tab-row-with-navigation > .evo-tab-row {
+.app-tabs__row__container.app-tabs__row__with_navigation > .app-tabs__row {
   @apply mx-5
 }
-.evo-tab-pane {
+.app-tabs {
   @apply flex flex-wrap flex-col grow content-start
 }
-.evo-tab-pane .evo-tab {
+.app-tabs .app-tabs__tab {
   @apply py-3 px-4 h-12 relative shrink-0 cursor-pointer whitespace-nowrap rounded-t select-none text-center font-medium text-gray-600 hover:bg-slate-200/40 dark:hover:bg-gray-700/50 dark:text-gray-300 transition
 }
-.evo-tab-pane .evo-tab.active {
+.app-tabs .app-tabs__tab.app-tabs__tab-active {
   @apply bg-white border-inherit text-gray-800 dark:bg-gray-700 dark:text-gray-50 shadow-md dark:shadow-black/20
 }
-.evo-tab-pane .evo-tab .evo-icon + span {
+.app-tabs .app-tabs__tab .app-tabs__tab-icon + span {
   @apply ml-2
 }
-.evo-tab-pane .evo-tab-pane-small-tabs {
+.app-tabs .app-tabs__small {
   @apply h-auto
 }
-.evo-tab-pane .evo-tab-pane-small-tabs .evo-tab-row {
+.app-tabs .app-tabs__small .app-tabs__row {
   @apply py-0.5 mx-0.5 h-auto
 }
-.evo-tab-pane .evo-tab-pane-small-tabs .evo-tab {
-  @apply px-2 py-1 mx-0.5 h-auto w-10 hover:bg-gray-700 text-gray-200 rounded
+.app-tabs .app-tabs__small .app-tabs__tab {
+  @apply px-2 py-1 mx-0.5 h-auto w-10 dark:hover:bg-gray-700 dark:text-gray-200 rounded
 }
-.evo-tab-pane .evo-tab-pane-small-tabs .evo-tab.active {
+.app-tabs .app-tabs__small .app-tabs__tab.app-tabs__tab-active {
   @apply bg-blue-600 text-white/90
 }
-.evo-tab-pane .evo-prev, .evo-tab-pane .evo-next {
+.app-tabs .app-tabs__prev, .app-tabs .app-tabs__next {
   @apply absolute h-11 w-5 top-1 pt-1 flex items-center justify-center cursor-pointer select-none hover:text-blue-500 transition
 }
-.evo-tab-pane .evo-prev {
+.app-tabs .app-tabs__prev {
   @apply left-0
 }
-.evo-tab-pane .evo-next {
+.app-tabs .app-tabs__next {
   @apply right-0
 }
-.evo-tab-pane .evo-prev.disabled, .evo-tab-pane .evo-next.disabled {
+.app-tabs .app-tabs__prev.disabled, .app-tabs .app-tabs__next.disabled {
   @apply opacity-0 scale-0
 }
-.evo-tab-page {
+.app-tabs__page {
   @apply w-full basis-0 content-start items-start grow bg-white dark:bg-gray-700 shadow
 }
-.evo-tab-pane.evo-tab-pane-vertical {
+.app-tabs.app-tabs__vertical {
   @apply flex-row
 }
-.evo-tab-pane-vertical > .evo-tab-row-container {
+.app-tabs__vertical > .app-tabs__row__container {
   @apply grow-0 h-auto w-auto pl-4 pr-0 mb-0 -mr-[1px]
 }
-.evo-tab-pane-vertical > .evo-tab-row-container::after {
+.app-tabs__vertical > .app-tabs__row__container::after {
   @apply left-auto top-0
 }
-.evo-tab-pane-vertical > .evo-tab-row-container .evo-tab-row {
+.app-tabs__vertical > .app-tabs__row__container .app-tabs__row {
   @apply flex-col h-auto pl-1 pr-0 py-4 m-0
 }
-.evo-tab-pane-vertical > .evo-tab-row-container .evo-tab {
+.app-tabs__vertical > .app-tabs__row__container .app-tabs__tab {
   @apply rounded-l rounded-r-none truncate max-w-[15rem]
 }
-.evo-tab-pane-vertical > .evo-tab-row-container .evo-prev::before, .evo-tab-pane-vertical > .evo-tab-row-container .evo-next::before {
+.app-tabs__vertical > .app-tabs__row__container .app-tabs__prev::before, .app-tabs__vertical > .app-tabs__row__container .app-tabs__next::before {
   @apply rotate-90
 }
-.evo-tab-pane-vertical > .evo-tab-row-container .evo-prev {
+.app-tabs__vertical > .app-tabs__row__container .app-tabs__prev {
   @apply h-auto w-full py-1
 }
-.evo-tab-pane-vertical > .evo-tab-row-container .evo-next {
+.app-tabs__vertical > .app-tabs__row__container .app-tabs__next {
   @apply h-auto w-full py-1 top-auto bottom-0
 }
-.evo-tab-pane-vertical > .evo-tab-page {
+.app-tabs__vertical > .app-tabs__page {
   @apply h-full grow basis-0 rounded-l
 }
-.evo-tab-pane-vertical.evo-tab-pane .evo-prev, .evo-tab-pane-vertical.evo-tab-pane .evo-next {
+.app-tabs__vertical.app-tabs .app-tabs__prev, .app-tabs__vertical.app-tabs .app-tabs__next {
   @apply hidden
 }
 </style>
 
-<style>
-.evo-panel > .evo-tab-pane > .evo-tab-row-container::before, .evo-panel > .layout > .evo-tab-pane > .evo-tab-row-container::before {
+<!--<style>
+.app-tabs > .app-tabs > .app-tabs__row__container::before, .app-tabs > .layout > .app-tabs > .app-tabs__row__container::before {
   @apply absolute left-0 top-0 right-0 bottom-[1px];
   content: "";
 }
-.evo-panel > .evo-tab-pane.evo-tab-pane-vertical > .evo-tab-row-container::before, .evo-panel > .layout > .evo-tab-pane.evo-tab-pane-vertical > .evo-tab-row-container::before {
+.app-tabs > .app-tabs.app-tabs__vertical > .app-tabs__row__container::before, .app-tabs > .layout > .app-tabs.app-tabs__vertical > .app-tabs__row__container::before {
   @apply bottom-0 right-[1px]
 }
-.evo-tab-page .evo-tab-pane-vertical {
+.app-tabs__page .app-tabs__vertical {
   @apply overflow-hidden
 }
-.evo-tab-page .evo-tab-pane-vertical > .evo-tab-page {
+.app-tabs__page .app-tabs__vertical > .app-tabs__page {
   @apply border-t-0 rounded-none rounded-l shadow-none border-l
 }
-.evo-tab-page .evo-tab-pane-vertical > .evo-tab-row-container {
+.app-tabs__page .app-tabs__vertical > .app-tabs__row__container {
   @apply mr-[-1px]
 }
-.evo-tab-page .evo-tab-pane-vertical > .evo-tab-row-container .evo-tab {
+.app-tabs__page .app-tabs__vertical > .app-tabs__row__container .app-tabs__tab {
   @apply shadow-none border border-transparent
 }
-.evo-tab-page .evo-tab-pane-vertical > .evo-tab-row-container .evo-tab.active {
+.app-tabs__page .app-tabs__vertical > .app-tabs__row__container .app-tabs__tab.app-tabs__tab-active {
   @apply border-inherit border-r-white dark:border-r-gray-700
 }
-.evo-tab-pane-vertical > .evo-tab-page .evo-tab-page {
+.app-tabs__vertical > .app-tabs__page .app-tabs__page {
   @apply px-8
 }
-</style>
+</style>-->

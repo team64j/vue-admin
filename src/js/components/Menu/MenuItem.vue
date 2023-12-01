@@ -39,19 +39,22 @@ const $methods = {
 
     axios.get(url, {
       params: params
-    }).then(({ data: data }) => {
+    }).then(({ data }) => {
+      const prepend = data['meta']['prepend'] ?? []
       const filterData = []
       const pagination = data['meta']['pagination'] ?? {}
 
-      if (pagination?.['total'] > pagination?.['page'] || $data.filter) {
+      if (pagination?.['total'] > pagination?.['per'] || $data.filter) {
         filterData.push({ filter: $data.filter || '' })
       }
 
-      $data.data = [].concat($props.data['data'], filterData, (data['data'] || []).map(i => {
-        i.to = {
-          name: $props.data['name'],
-          params: {
-            id: i.id
+      $data.data = [].concat(prepend, filterData, (data['data'] || []).map(i => {
+        if (!i.to) {
+          i.to = {
+            name: data['meta']['name'],
+            params: {
+              id: i.id
+            }
           }
         }
 

@@ -2,7 +2,7 @@
   <div class="relative flex items-center mx-0.5">
     <button
         v-if="icon"
-        class="evo-tree__menu__item"
+        class="app-tree__menu__item"
         @mousedown="clickItem"
         @blur="blur">
       <template v-if="loader">

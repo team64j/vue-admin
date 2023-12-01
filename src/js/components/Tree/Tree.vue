@@ -1,33 +1,33 @@
 <template>
-  <div class="evo-tree" v-if="!needReload">
+  <div class="app-tree" v-if="!needReload">
     <tree-menu v-if="menu" v-bind="menu" :settings="settings" :loading="loading" @action="action"/>
     <tree-search v-show="propSearch" @action="action"/>
-    <div class="evo-tree__body">
-      <div class="evo-tree__root">
+    <div class="app-tree__body">
+      <div class="app-tree__root">
 
         <div v-if="!data" class="text-center p-5">
           <evo-layout-loader-icon/>
         </div>
 
-        <ul v-else-if="data?.['data']?.length">
+        <ul v-else-if="data?.length">
           <tree-node
-              v-for="node in data?.['data']"
+              v-for="node in data"
               :node="node"
               :level="1"
               v-bind="$props"
               @action="action"
           />
 
-          <li v-if="data?.['pagination']?.['next']" @click.stop="more(data['pagination']['next'])">
-            <a class="evo-tree__node-more">
+          <li v-if="meta?.['pagination']?.['next']" @click.stop="more(meta['pagination']['next'])">
+            <a class="app-tree__node-more">
               <evo-layout-loader-icon v-if="data.loading"/>
-              <span v-else>{{ $store.getters['Lang/get']('paging_next') }}</span>
+              <span v-else>{{ meta['pagination']['lang']['next'] }}</span>
             </a>
           </li>
         </ul>
 
         <div v-else class="p-5 text-center">
-          {{ $store.getters['Lang/get']('not_set') }}
+          {{ meta['message'] }}
         </div>
 
       </div>
@@ -112,6 +112,7 @@ export default {
     return {
       loading: false,
       data: null,
+      meta: null,
       needReload: false,
       opened: this.$store.getters['Storage/get'](this.keyStorage)?.['opened'] ?? [],
       propSettings: this.settings || {},
@@ -166,15 +167,15 @@ export default {
       if (this.$store.state.route === this.dataRoute.name) {
         switch (this.$store.state.action) {
           case 'create':
-            this.createNode(this.$store.state.data, this.data['data'])
+            this.createNode(this.$store.state.data, this.data)
             break
 
           case 'update':
-            this.updateNode(this.$store.state.data, this.data['data'])
+            this.updateNode(this.$store.state.data, this.data)
             break
 
           case 'delete':
-            this.deleteNode(this.$store.state.data, this.data['data'])
+            this.deleteNode(this.$store.state.data, this.data)
             break
         }
       }
@@ -219,8 +220,9 @@ export default {
           settings: this.propSettings,
           filter: this.filter
         }
-      }).then(r => {
-        this.data = r.data.data
+      }).then(({ data }) => {
+        this.data = data['data']
+        this.meta = data['meta']
       }).finally(() => {
         this.loader(0)
       })
@@ -233,6 +235,7 @@ export default {
     onSearch (value) {
       this.filter = value
       this.data = null
+      this.meta = null
 
       this.get()
     },
@@ -243,6 +246,7 @@ export default {
       if (node['data']) {
         this.removeOpened(node)
         node['data'] = null
+        node['meta'] = null
         node['loading'] = false
 
         this.loader(0)
@@ -252,9 +256,10 @@ export default {
             parent: node['id'] ?? node['key'],
             settings: this.propSettings
           }
-        }).then(r => {
+        }).then(({ data }) => {
           this.setOpened(node)
-          node['data'] = r.data.data
+          node['data'] = data['data']
+          node['meta'] = data['meta']
         }).finally(() => {
           this.loader(0)
           node['loading'] = false
@@ -285,7 +290,7 @@ export default {
     },
 
     removeChildOpened (data) {
-      for (const node of data.data.data) {
+      for (const node of data['data']) {
         const id = node['id'] ?? node['key']
 
         if (node['folder'] && node['data']) {
@@ -308,11 +313,11 @@ export default {
         params: {
           settings: this.propSettings
         }
-      }).then(r => {
-        this.data['pagination']['next'] = r.data.data?.pagination?.['next'] || null
+      }).then(({ data }) => {
+        this.meta['pagination']['next'] = data['meta']?.pagination?.['next'] || null
 
-        if (r.data.data.data) {
-          this.data['data'].push(...r.data.data.data)
+        if (data['data']) {
+          this.data.push(...data['data'])
         }
       }).finally(() => {
         this.loader(0)
@@ -362,7 +367,7 @@ export default {
         this.loader(1)
       }
 
-      data = data || this.data.data
+      data = data || this.data
       node = this.alias(node)
 
       if (node.id) {
@@ -398,11 +403,11 @@ export default {
     },
 
     transfer (node, data) {
-      data = data || this.data.data
+      data = data || this.data
 
       // for (const i in data) {
       //   if (data[i].id === node['parent'] && data[i].folder) {
-      //     data[i].data.data.push(node)
+      //     data[i].data.push(node)
       //     console.log(node)
       //   } else if (data[i].folder && data[i]['data']) {
       //     this.transfer(node, data[i]['data'])
@@ -412,7 +417,7 @@ export default {
 
       // for (const i in data) {
       //   if (data[i].id === node['parent'] && data[i].folder) {
-      //     data[i].data.data.push(node)
+      //     data[i].data.push(node)
       //   } else if(data[i]?.['data']?.['data']) {
       //     if (!data[i]['data']['data'].length) {
       //       //data.splice(i, 1)
@@ -454,93 +459,93 @@ export default {
 </script>
 
 <style>
-.evo-tree {
+.app-tree {
   @apply relative h-full w-full overflow-hidden flex flex-col flex-wrap cursor-default
 }
-.evo-tree .evo-tree__body {
+.app-tree .app-tree__body {
   @apply h-0 grow w-full relative transition-all duration-200
 }
-.evo-tree .evo-tree__root {
+.app-tree .app-tree__root {
   @apply h-full overflow-hidden overflow-y-auto py-2
 }
-.evo-tree.focus .evo-tree__root {
+.app-tree.focus .app-tree__root {
   @apply outline outline-2 -outline-offset-2 outline-blue-600
 }
-.evo-tree li .evo-tree__node-more {
+.app-tree li .app-tree__node-more {
   @apply block relative cursor-pointer text-center text-amber-400 hover:text-amber-300 pr-8
 }
-.evo-tree .evo-tree__menu {
+.app-tree .app-tree__menu {
   @apply w-full p-1 flex border-b
 }
-.evo-tree .evo-tree__menu a {
+.app-tree .app-tree__menu a {
   @apply px-1.5 h-8 w-9 m-0.5 rounded inline-flex items-center justify-center shrink-0 bg-gray-700 hover:bg-gray-600 cursor-pointer
 }
-.evo-tree .evo-tree__menu__item {
+.app-tree .app-tree__menu__item {
   @apply inline-flex items-center justify-center p-0.5 cursor-pointer !ring-0 text-slate-600 dark:text-gray-200 dark:hover:text-gray-200 hover:bg-gray-600 active:bg-gray-400 rounded border-0 transition
 }
-.evo-tree .evo-tree__menu__item > * {
+.app-tree .app-tree__menu__item > * {
   @apply inline-flex items-center justify-center
 }
-.evo-tree li .evo-tree__node {
+.app-tree li .app-tree__node {
   @apply flex items-center whitespace-nowrap relative pl-8 pr-2 py-0.5 h-8 text-gray-400
 }
-.evo-tree li > .evo-tree__node::after {
+.app-tree li > .app-tree__node::after {
   @apply z-10 absolute left-0.5 top-0 right-0.5 bottom-0 rounded pointer-events-none transition;
   content: "";
 }
-.evo-tree li > .evo-tree__node:hover::after {
+.app-tree li > .app-tree__node:hover::after {
   @apply bg-white/5
 }
-.evo-tree li.evo-tree__node-active > .evo-tree__node::after {
+.app-tree li.app-tree__node-active > .app-tree__node::after {
   @apply bg-white/10
 }
-.evo-tree .evo-tree__node__toggle {
+.app-tree .app-tree__node__toggle {
   @apply w-5 h-5 -ml-6 mr-1 inline-flex items-center text-gray-400 text-center rounded hover:text-blue-400 hover:bg-gray-400/10
 }
-.evo-tree .evo-tree__node__toggle i {
+.app-tree .app-tree__node__toggle i {
   @apply cursor-pointer
 }
-.evo-tree .evo-tree__node-icon {
+.app-tree .app-tree__node-icon {
   @apply w-7 h-5 grow-0 shrink-0 text-center;
   font-size: 1.25rem;
 }
-.evo-tree .evo-tree__node-icon > .evo-tree__node-lock {
+.app-tree .app-tree__node-icon > .app-tree__node-lock {
   @apply text-rose-600 text-sm relative -ml-2 w-2
 }
-.evo-tree .evo-tree__node .evo-tree__node-title {
+.app-tree .app-tree__node .app-tree__node-title {
   @apply grow block items-center pl-1 pt-0.5 h-full text-gray-700 hover:text-gray-800 dark:text-gray-100 dark:hover:text-gray-50 truncate cursor-pointer
 }
-.evo-tree .evo-tree__node .evo-tree__node-size {
+.app-tree .app-tree__node .app-tree__node-size {
   @apply text-gray-200/50
 }
-.evo-tree .evo-tree__node .evo-tree__node-date {
+.app-tree .app-tree__node .app-tree__node-date {
   @apply text-gray-200/80
 }
-.evo-tree .evo-tree__node-help {
+.app-tree .app-tree__node-help {
   @apply fixed z-50 w-72 p-4 text-sm text-left font-normal font-sans whitespace-normal rounded text-white bg-gray-800 dark:text-gray-800 dark:bg-white shadow-lg opacity-0 invisible transition
 }
-.evo-tree .evo-tree__node-hover > .evo-tree__node > .evo-tree__node-help {
+.app-tree .app-tree__node-hover > .app-tree__node > .app-tree__node-help {
   @apply opacity-90 visible
 }
-.evo-tree .evo-tree__node-hide > .evo-tree__node > .evo-tree__node-title {
+.app-tree .app-tree__node-hide > .app-tree__node > .app-tree__node-title {
   @apply text-gray-500 hover:text-gray-400
 }
-.evo-tree .evo-tree__node-inhidden > .evo-tree__node > .evo-tree__node-title {
-  @apply text-blue-300 hover:text-blue-200
+.app-tree .app-tree__node-inhidden > .app-tree__node > .app-tree__node-title {
+  @apply text-blue-500 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-200
 }
-.evo-tree .evo-tree__node-unpublished > .evo-tree__node > .evo-tree__node-title {
+.app-tree .app-tree__node-unpublished > .app-tree__node > .app-tree__node-title {
   @apply italic text-rose-500 hover:text-rose-400
 }
-.evo-tree .evo-tree__node-deleted > .evo-tree__node > .evo-tree__node-title {
+.app-tree .app-tree__node-deleted > .app-tree__node > .app-tree__node-title {
   @apply not-italic line-through text-rose-800 hover:text-rose-700
 }
-.evo-tree .evo-tree__node-split + .evo-tree__node-split {
+.app-tree .app-tree__node-split + .app-tree__node-split {
   @apply hidden
 }
-.evo-tree .evo-tree__node__menu {
+.app-tree .app-tree__node__menu {
   @apply absolute z-20 mt-1 py-1 bg-gray-700 rounded shadow border text-white/70 cursor-default
 }
-.evo-tree .evo-tree__node__menu i {
+.app-tree .app-tree__node__menu i {
   @apply opacity-70
 }
 </style>

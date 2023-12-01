@@ -2,19 +2,19 @@
   <li
       :class="this.class"
       :data-level="level">
-    <div :style="{ paddingLeft: (level * 18) + 8 + 'px' }" class="evo-tree__node">
-      <div v-if="node['loading']" class="evo-tree__node__toggle">
+    <div :style="{ paddingLeft: (level * 18) + 8 + 'px' }" class="app-tree__node">
+      <div v-if="node['loading']" class="app-tree__node__toggle">
         <evo-layout-loader-icon/>
       </div>
       <div v-else-if="node['folder'] && !node['hideChildren']"
-           class="evo-tree__node__toggle"
+           class="app-tree__node__toggle"
            @click.stop="$emit('action', 'toggle', node)">
         <i v-if="node?.['data']" class="fa fa-angle-down fa-fw"/>
         <i v-else class="fa fa-angle-right fa-fw"/>
       </div>
 
-      <i class="evo-tree__node-icon" :class="icon" @mousedown="contextmenu">
-        <i v-if="node['private']" class="fa fa-lock evo-tree__node-lock"/>
+      <i class="app-tree__node-icon" :class="icon" @mousedown="contextmenu">
+        <i v-if="node['private']" class="fa fa-lock app-tree__node-lock"/>
       </i>
 
       <div @click="$emit('action', 'click', $event, node, category)"
@@ -22,20 +22,20 @@
            @mouseenter="mouseenter"
            @mousemove="mousemove"
            @mouseleave="mouseleave"
-           class="evo-tree__node-title"
+           class="app-tree__node-title"
            :title="title">
         {{ name }}
       </div>
 
       <component :is="append"/>
 
-      <div v-if="help" v-html="help" class="evo-tree__node-help"/>
+      <div v-if="help" v-html="help" class="app-tree__node-help"/>
       <button ref="menuBtn" class="absolute opacity-0 w-0 h-0 p-0" @click="menuOpen" @blur="menuClose"/>
 
       <transition>
         <div v-if="menuActive"
              :class="menuData.class"
-             class="evo-tree__node__menu">
+             class="app-tree__node__menu">
           <div class="py-1 px-4 w-72 text-white/90 truncate" :title="node.title">
             {{ node.title }}
           </div>
@@ -43,7 +43,7 @@
             <div v-if="action.title && Object.values(action).length === 1" class="py-1 px-4 text-white/80">
               {{ action.title }}
             </div>
-            <div v-else-if="action.split" class="evo-tree__node-split py-1 px-3">
+            <div v-else-if="action.split" class="app-tree__node-split py-1 px-3">
               <div class="border-b"></div>
             </div>
             <div v-else class="px-4 py-0.5 whitespace-nowrap hover:text-white hover:bg-blue-500"
@@ -56,16 +56,16 @@
       </transition>
     </div>
 
-    <ul v-if="node?.['data']?.['data'] && node['data']?.['data'].length">
+    <ul v-if="node?.['data'] && node['data'].length">
       <tree-node
-          v-for="child in node['data']['data']"
+          v-for="child in node['data']"
           v-bind="Object.assign({}, $props, { node: child, level: level + 1 })"
           @action="action"/>
 
-      <li v-if="node['data']?.['pagination']?.['next']" @click.stop="more(node['data']['pagination']['next'])">
-        <a class="evo-tree__node-more">
+      <li v-if="node['meta']?.['pagination']?.['next']" @click.stop="more(node['meta']['pagination']['next'])">
+        <a class="app-tree__node-more">
           <evo-layout-loader-icon v-if="node['loading']"/>
-          <span v-else>{{ $store.getters['Lang/get']('paging_next') }}</span>
+          <span v-else>{{ node['meta']['pagination']['lang']['next'] }}</span>
         </a>
       </li>
     </ul>
@@ -107,35 +107,35 @@ export default {
       }
 
       if (this.node['folder'] !== undefined || !!this.node['data']) {
-        classes.push('evo-tree__node-folder')
+        classes.push('app-tree__node-folder')
       }
 
       if (!!this.node['data']) {
-        classes.push('evo-tree__node-opened')
+        classes.push('app-tree__node-opened')
       }
 
       if (this.node['hidden']) {
-        classes.push('evo-tree__node-hide')
+        classes.push('app-tree__node-hide')
       }
 
       if (this.node['unhidden'] || (this.node['inhidden'] !== undefined && !this.node['inhidden'])) {
-        classes.push('evo-tree__node-inhidden')
+        classes.push('app-tree__node-inhidden')
       }
 
       if (this.node['unpublished'] || this.node['published'] !== undefined && !this.node['published']) {
-        classes.push('evo-tree__node-unpublished')
+        classes.push('app-tree__node-unpublished')
       }
 
       if (this.node['deleted']) {
-        classes.push('evo-tree__node-deleted')
+        classes.push('app-tree__node-deleted')
       }
 
       if (this.current) {
-        classes.push('evo-tree__node-active')
+        classes.push('app-tree__node-active')
       }
 
       if (this.menuActive) {
-        classes.push('evo-tree__node-menu-active')
+        classes.push('app-tree__node-menu-active')
       }
 
       return classes
@@ -153,7 +153,7 @@ export default {
           break
 
         case !!this.node['folder']:
-          if (this.node?.['data']?.['data']?.length) {
+          if (this.node?.['data']?.length) {
             icon = this.icons.folderOpen
           } else {
             icon = this.icons.folder
@@ -263,11 +263,11 @@ export default {
     more (url) {
       this.$emit('action', 'loader', 1)
       this.node.loading = true
-      axios.get(url).then(r => {
-        this.node['data']['pagination']['next'] = r.data.data?.pagination?.['next'] || null
+      axios.get(url).then(({ data }) => {
+        this.node['meta']['pagination']['next'] = data['meta']?.['pagination']?.['next'] || null
 
-        if (r.data.data.data) {
-          this.node['data']['data'].push(...r.data.data.data)
+        if (data['data']) {
+          this.node['data'].push(...data['data'])
         }
 
         this.$emit('action', 'loader', 0)
@@ -292,7 +292,7 @@ export default {
       event.target.focus()
 
       this.$nextTick(() => {
-        let menu = this.$el.querySelector('.evo-tree__node__menu'),
+        let menu = this.$el.querySelector('.app-tree__node__menu'),
             position = this.$el.firstElementChild.getBoundingClientRect()
 
         menu.classList.add(
@@ -324,14 +324,14 @@ export default {
       if (this.templates?.help) {
         this.timer = setTimeout(() => {
           clearTimeout(this.timer)
-          this.$el.classList.add('evo-tree__node-hover')
+          this.$el.classList.add('app-tree__node-hover')
         }, 1000)
       }
     },
 
     mousemove (event) {
       if (this.templates?.help) {
-        const help = this.$el.querySelector('.evo-tree__node-help')
+        const help = this.$el.querySelector('.app-tree__node-help')
         help.style.left = event.clientX + 16 + 'px'
         help.style.top = event.clientY + 16 + 'px'
 
@@ -344,7 +344,7 @@ export default {
     mouseleave () {
       if (this.templates?.help) {
         clearTimeout(this.timer)
-        this.$el.classList.remove('evo-tree__node-hover')
+        this.$el.classList.remove('app-tree__node-hover')
       }
     }
   }
