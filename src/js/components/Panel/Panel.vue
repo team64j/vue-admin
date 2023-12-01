@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div v-if="!propData.data" class="text-center p-5 w-full">
+    <div v-if="!propData" class="text-center p-5 w-full">
       <evo-layout-loader-icon/>
     </div>
 
@@ -70,9 +70,9 @@
         </tr>
         </thead>
 
-        <template v-if="propData.data.length && !propData.data[0]?.data">
+        <template v-if="propData.length && !propData[0]?.data">
           <tbody v-if="propRoute">
-          <router-link v-for="item in propData.data" :to="{ name: propRoute, params: { id: item.id } }"
+          <router-link v-for="item in propData" :to="{ name: propRoute, params: { id: item.id } }"
                        custom v-slot="{ navigate }">
             <tr @click="navigate" class="cursor-pointer" :class="{ 'disabled' : item.disabled }">
               <panel-cell
@@ -86,8 +86,8 @@
           </router-link>
           </tbody>
 
-          <draggable v-else-if="propData?.draggable"
-                     :list="propData.data"
+          <draggable v-else-if="propMeta?.draggable"
+                     :list="propData"
                      item-key="id"
                      tag="tbody"
                      handle=".draggable-handle"
@@ -95,7 +95,7 @@
             <template #item="{ element: item }">
               <tr :class="{ 'disabled' : item.disabled }">
                 <panel-cell :columns="propColumns"
-                            :category="propData.data"
+                            :category="propData"
                             :data="$parent.$parent.$parent['data']"
                             :item="item"
                             @action="action"
@@ -105,12 +105,12 @@
           </draggable>
 
           <tbody v-else>
-          <tr v-for="item in propData.data"
+          <tr v-for="item in propData"
               :class="{ 'disabled' : item.disabled, 'active': item['@active'] }"
-              @click="selectRow(item, propData.data, $event)">
+              @click="selectRow(item, propData, $event)">
             <panel-cell
                 :columns="propColumns"
-                :category="propData.data"
+                :category="propData"
                 :data="$parent.$parent.$parent['data']"
                 :item="item"
                 @action="action"
@@ -119,8 +119,8 @@
           </tbody>
         </template>
 
-        <template v-else-if="propData.data.length">
-          <template v-for="category in propData.data">
+        <template v-else-if="propData.length">
+          <template v-for="category in propData">
             <tbody v-if="category.name && category.data.length">
             <tr class="evo-category"
                 :class="{ closed: category.closed }"
@@ -193,7 +193,7 @@
         <tbody v-else>
         <tr>
           <td class="!p-5 text-center" :colspan="propColumns.length">
-            <div v-if="!propData.data?.length && loaded">
+            <div v-if="!propData?.length && loaded">
               {{ $store.getters['Lang/get']('not_set') }}
             </div>
             <div v-else>
@@ -207,7 +207,7 @@
       <div class="evo-data-mask" @mouseup="columnUp" @touchend="columnUp" @mousemove="columnMove" @touchmove="columnMove"/>
     </div>
 
-    <panel-pagination :data="propData['pagination']" @action="action"/>
+    <panel-pagination :data="propMeta?.['pagination']" @action="action"/>
   </div>
   <div v-else class="text-center p-5 w-full">
     <evo-layout-loader-icon/>
@@ -228,6 +228,10 @@ export default {
   props: {
     currentRoute: Object,
     data: {
+      type: [null, Object],
+      default: null
+    },
+    meta: {
       type: [null, Object],
       default: null
     },
@@ -260,10 +264,11 @@ export default {
 
     return {
       propData: this.data || null,
-      propColumns: this.columns || this.data?.columns || null,
-      propFilter: this.filter || this.data?.filter || null,
-      propFilters: this.filters || this.data?.filters || null,
-      propRoute: this.route || this?.data?.route || null,
+      propMeta: this.meta || null,
+      propColumns: this.columns || this.meta?.columns || null,
+      propFilter: this.filter || this.meta?.filter || null,
+      propFilters: this.filters || this.meta?.filters || null,
+      propRoute: this.route || this?.meta?.route || null,
       propUrl: this.url ?? (this.$route?.['meta']?.url || (this.$route['path'])) ??
           null,
       x: 0,
@@ -287,15 +292,18 @@ export default {
         this.propColumns = data.columns
       }
     },
-    propData () {
-      this.setColumnsSettings()
-    },
+    // propData () {
+    //   this.setColumnsSettings()
+    // },
+    currentRoute () {
+      this.get()
+    }
   },
 
   created () {
     this.filterValue = this.currentRoute?.['query']?.['filter']
 
-    if (this.url) {
+    if (this.propUrl) {
       this.get()
     }
 
@@ -322,28 +330,29 @@ export default {
       query = Object.assign(url.query, query || this.currentRoute?.['query'] || {})
 
       if (data) {
-        this.propData.data = []
+        this.propData = []
         this.loaded = false
       } else {
-        if (this.propData?.data !== undefined) {
-          this.propData.data = null
+        if (this.propData !== undefined) {
+          this.propData = null
         }
       }
 
-      if (this.propData?.pagination) {
-        this.propData.pagination = null
+      if (this.propMeta?.pagination) {
+        this.propMeta.pagination = null
       }
 
       axios.get(path, {
         params: query
-      }).then(r => {
+      }).then(({ data }) => {
         this.loaded = true
-        this.propData = r.data.data || r.data.data?.data
-        this.propColumns = r.data.data?.columns || r.data.data?.data?.columns || this.propColumns
-        this.propFilter = (r.data.data.hasOwnProperty('filter') && r.data.data?.filter) ||
-            (r.data.data?.data?.hasOwnProperty('filter') && r.data.data?.data?.filter) || this.propFilter
-        this.propFilters = r.data.data?.filters || r.data.data?.data?.filters || this.propFilters
-        this.propRoute = r.data.data?.route || r.data.data?.data?.route || this.propRoute
+        this.propData = data['data'] || data['data']?.['data']
+        this.propMeta = data['meta'] || null
+        this.propColumns = data['meta']?.columns || data['data']?.['data']?.columns || this.propColumns
+        this.propFilter = (data['meta'].hasOwnProperty('filter') && data['meta']?.filter) ||
+            (data['data']?.['data']?.hasOwnProperty('filter') && data['data']?.['data']?.filter) || this.propFilter
+        this.propFilters = data['meta']?.filters || data['data']?.['data']?.filters || this.propFilters
+        this.propRoute = data['meta']?.route || data['data']?.['data']?.route || this.propRoute
       })
     },
 
@@ -352,8 +361,8 @@ export default {
       const closed = settings.closed ?? []
       const width = settings.width ?? {}
 
-      if (this.propData?.data) {
-        this.propData.data.map(category => {
+      if (this.propData) {
+        this.propData.map(category => {
           if (category.data) {
             const index = closed.indexOf(category.id)
             category.closed = index > -1
@@ -639,7 +648,7 @@ export default {
       const active = item['@active']
 
       if (!event.ctrlKey) {
-        this.propData.data.map(i => {
+        this.propData.map(i => {
           if (i.data) {
             i.data.map(j => j['@active'] = false)
           } else {

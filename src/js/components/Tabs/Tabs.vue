@@ -209,6 +209,7 @@ export default {
 
     select (tab, index) {
       this.active = tab.id
+      this.$store.dispatch('Storage/set', [this.keyStorage, { active: this.active }])
 
       this.init(index)
 
@@ -219,9 +220,6 @@ export default {
 
         route.params[this.history] = tab.id
         this.$emit('action', 'pushRouter', route)
-
-      } else if (this.keyStorage) {
-        this.$store.dispatch('Storage/set', [this.keyStorage, { active: this.active }])
       }
 
       if (this.loadOnce) {
